@@ -1,0 +1,12 @@
+version: "3.8"
+
+services:
+  psql:
+    image: postgres
+    container_name: psql
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=transaction-service
