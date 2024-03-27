@@ -102,5 +102,8 @@ func (t *transactionHandler) successResponse(ctx context.Context, c *gin.Context
 
 func (t *transactionHandler) logAndReturn(ctx context.Context, c *gin.Context, status int, res interface{}) {
 	t.log.InfoContext(ctx, fmt.Sprintf("Returned response: %v, %v", status, spew.Sdump(res)))
+
+	c.Header("Access-Control-Allow-Origin", "*")
 	c.JSON(status, res)
+
 }
