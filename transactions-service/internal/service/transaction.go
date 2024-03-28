@@ -13,6 +13,7 @@ import (
 
 type TransactionService interface {
 	FindAll(ctx context.Context) ([]model.TransactionResponse, error)
+	Statistics(ctx context.Context, by string) (model.StatisticsResponse, error)
 	FindById(ctx context.Context, id uuid.UUID) (model.TransactionResponse, error)
 }
 
@@ -51,4 +52,19 @@ func (t *transactionService) FindById(ctx context.Context, id uuid.UUID) (model.
 	}
 	t.log.InfoContext(ctx, fmt.Sprintf("Found by id: %v", spew.Sdump(transaction)))
 	return t.mapper.ToResponse(transaction), nil
+}
+
+func (t *transactionService) Statistics(ctx context.Context, by string) (model.StatisticsResponse, error) {
+	t.log.InfoContext(ctx, fmt.Sprintf("Retrieving transaction statistics by: %v", by))
+	income, err := t.repo.StatisticsBy(by, true)
+	if err != nil {
+		t.log.ErrorContext(ctx, "When retrieving income transaction statistics")
+		return model.StatisticsResponse{}, err
+	}
+	expenses, err := t.repo.StatisticsBy(by, false)
+	if err != nil {
+		t.log.ErrorContext(ctx, "When retrieving expenses transaction statistics")
+		return model.StatisticsResponse{}, err
+	}
+	return t.mapper.ToStatisticsResponse(income, expenses), nil
 }

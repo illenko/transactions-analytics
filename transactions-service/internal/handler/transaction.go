@@ -15,6 +15,7 @@ import (
 type TransactionHandler interface {
 	FindAll(c *gin.Context)
 	FindById(c *gin.Context)
+	Statistics(c *gin.Context)
 }
 
 type transactionHandler struct {
@@ -43,6 +44,31 @@ func (t *transactionHandler) FindAll(c *gin.Context) {
 	t.log.InfoContext(ctx, "Processing find all request")
 
 	transactions, err := t.service.FindAll(ctx)
+
+	if err != nil {
+		t.badRequestProcessed(ctx, c, err)
+		return
+	}
+
+	t.successResponse(ctx, c, transactions)
+}
+
+// Statistics
+//
+//	@Summary	Retrieve transactions statistics by category
+//	@Schemes
+//	@Param   by  path     string     true  "Report grouped by"       Enums(category, merchant)
+//	@Tags			transaction, statistics
+//	@Produce		json
+//	@Success		200	{array}	model.StatisticsResponse
+//	@Router			/statistics/{by} [get]
+func (t *transactionHandler) Statistics(c *gin.Context) {
+	requestID := uuid.New()
+	ctx := logger.AppendCtx(context.Background(), slog.String("requestID", requestID.String()))
+	t.log.InfoContext(ctx, "Processing find all request")
+
+	by := c.Param("by")
+	transactions, err := t.service.Statistics(ctx, by)
 
 	if err != nil {
 		t.badRequestProcessed(ctx, c, err)

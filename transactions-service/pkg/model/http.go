@@ -12,3 +12,20 @@ type TransactionResponse struct {
 	Category string    `json:"category"`
 	Merchant string    `json:"merchant"`
 }
+
+type StatisticsResponse struct {
+	Income   Statistics `json:"income"`
+	Expenses Statistics `json:"expenses"`
+}
+
+type Statistics struct {
+	Count  int               `json:"count"`
+	Amount float64           `json:"amount"`
+	Groups []StatisticsGroup `json:"groups"`
+}
+
+type StatisticsGroup struct {
+	Name   string  `json:"name"`
+	Count  int     `json:"count"`
+	Amount float64 `json:"amount"`
+}

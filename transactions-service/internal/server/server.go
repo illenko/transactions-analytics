@@ -12,6 +12,7 @@ func New(handler handler.TransactionHandler) *gin.Engine {
 	e := gin.Default()
 	e.GET("/transactions", handler.FindAll)
 	e.GET("/transactions/:id", handler.FindById)
+	e.GET("/statistics/:by", handler.Statistics)
 	docs.SwaggerInfo.BasePath = "/"
 	e.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 	return e

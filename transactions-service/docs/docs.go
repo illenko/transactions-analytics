@@ -15,6 +15,42 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/statistics/{by}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "transaction",
+                    "statistics"
+                ],
+                "summary": "Retrieve transactions statistics by category",
+                "parameters": [
+                    {
+                        "enum": [
+                            "category",
+                            "merchant"
+                        ],
+                        "type": "string",
+                        "description": "Report grouped by",
+                        "name": "by",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.StatisticsResponse"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/transactions": {
             "get": {
                 "produces": [
@@ -67,6 +103,48 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "model.Statistics": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "number"
+                },
+                "count": {
+                    "type": "integer"
+                },
+                "groups": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.StatisticsGroup"
+                    }
+                }
+            }
+        },
+        "model.StatisticsGroup": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "number"
+                },
+                "count": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.StatisticsResponse": {
+            "type": "object",
+            "properties": {
+                "expenses": {
+                    "$ref": "#/definitions/model.Statistics"
+                },
+                "income": {
+                    "$ref": "#/definitions/model.Statistics"
+                }
+            }
+        },
         "model.TransactionResponse": {
             "type": "object",
             "properties": {
