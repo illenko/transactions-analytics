@@ -29,3 +29,8 @@ type StatisticsGroup struct {
 	Count  int     `json:"count"`
 	Amount float64 `json:"amount"`
 }
+
+type MonthExpense struct {
+	Month  string  `json:"month"`
+	Amount float64 `json:"amount"`
+}

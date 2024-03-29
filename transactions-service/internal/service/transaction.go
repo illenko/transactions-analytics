@@ -14,6 +14,7 @@ import (
 type TransactionService interface {
 	FindAll(ctx context.Context) ([]model.TransactionResponse, error)
 	Statistics(ctx context.Context, by string) (model.StatisticsResponse, error)
+	MerchantExpenses(ctx context.Context, by string) ([]model.MonthExpense, error)
 	FindById(ctx context.Context, id uuid.UUID) (model.TransactionResponse, error)
 }
 
@@ -56,15 +57,25 @@ func (t *transactionService) FindById(ctx context.Context, id uuid.UUID) (model.
 
 func (t *transactionService) Statistics(ctx context.Context, by string) (model.StatisticsResponse, error) {
 	t.log.InfoContext(ctx, fmt.Sprintf("Retrieving transaction statistics by: %v", by))
-	income, err := t.repo.StatisticsBy(by, true)
+	income, err := t.repo.Statistics(by, true)
 	if err != nil {
 		t.log.ErrorContext(ctx, "When retrieving income transaction statistics")
 		return model.StatisticsResponse{}, err
 	}
-	expenses, err := t.repo.StatisticsBy(by, false)
+	expenses, err := t.repo.Statistics(by, false)
 	if err != nil {
 		t.log.ErrorContext(ctx, "When retrieving expenses transaction statistics")
 		return model.StatisticsResponse{}, err
 	}
 	return t.mapper.ToStatisticsResponse(income, expenses), nil
+}
+
+func (t *transactionService) MerchantExpenses(ctx context.Context, merchant string) ([]model.MonthExpense, error) {
+	t.log.InfoContext(ctx, fmt.Sprintf("Retrieving merchant expenses by: %v", merchant))
+	expenses, err := t.repo.MerchantExpenses(merchant)
+	if err != nil {
+		t.log.ErrorContext(ctx, "When merchant expenses")
+		return []model.MonthExpense{}, err
+	}
+	return t.mapper.ToMonthExpenses(expenses), nil
 }

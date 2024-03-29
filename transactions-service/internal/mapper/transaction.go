@@ -12,6 +12,7 @@ type TransactionMapper interface {
 	ToResponse(entity dbmodel.Transaction) model.TransactionResponse
 	ToResponseList(entities []dbmodel.Transaction) []model.TransactionResponse
 	ToStatisticsResponse(income []dbmodel.StatisticsBy, expenses []dbmodel.StatisticsBy) model.StatisticsResponse
+	ToMonthExpenses(expenses []dbmodel.MerchantExpense) []model.MonthExpense
 }
 
 type transactionMapper struct {
@@ -42,6 +43,15 @@ func (t *transactionMapper) ToStatisticsResponse(income []dbmodel.StatisticsBy, 
 		Income:   t.toStatistics(income),
 		Expenses: t.toStatistics(expenses),
 	}
+}
+
+func (t *transactionMapper) ToMonthExpenses(expenses []dbmodel.MerchantExpense) []model.MonthExpense {
+	return lo.Map(expenses, func(item dbmodel.MerchantExpense, _ int) model.MonthExpense {
+		return model.MonthExpense{
+			Month:  item.Month.Month().String()[:3],
+			Amount: item.Amount,
+		}
+	})
 }
 
 func (t *transactionMapper) toStatistics(entities []dbmodel.StatisticsBy) model.Statistics {

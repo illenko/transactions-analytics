@@ -16,6 +16,7 @@ type TransactionHandler interface {
 	FindAll(c *gin.Context)
 	FindById(c *gin.Context)
 	Statistics(c *gin.Context)
+	MerchantExpenses(c *gin.Context)
 }
 
 type transactionHandler struct {
@@ -32,7 +33,7 @@ func NewTransactionHandler(log *slog.Logger, service service.TransactionService)
 
 // FindAll
 //
-//	@Summary	Retrieve transactions
+//	@Summary	    Retrieve transactions
 //	@Schemes
 //	@Tags			transaction
 //	@Produce		json
@@ -46,32 +47,7 @@ func (t *transactionHandler) FindAll(c *gin.Context) {
 	transactions, err := t.service.FindAll(ctx)
 
 	if err != nil {
-		t.badRequestProcessed(ctx, c, err)
-		return
-	}
-
-	t.successResponse(ctx, c, transactions)
-}
-
-// Statistics
-//
-//	@Summary	Retrieve transactions statistics by category
-//	@Schemes
-//	@Param   by  path     string     true  "Report grouped by"       Enums(category, merchant)
-//	@Tags			transaction, statistics
-//	@Produce		json
-//	@Success		200	{array}	model.StatisticsResponse
-//	@Router			/statistics/{by} [get]
-func (t *transactionHandler) Statistics(c *gin.Context) {
-	requestID := uuid.New()
-	ctx := logger.AppendCtx(context.Background(), slog.String("requestID", requestID.String()))
-	t.log.InfoContext(ctx, "Processing find all request")
-
-	by := c.Param("by")
-	transactions, err := t.service.Statistics(ctx, by)
-
-	if err != nil {
-		t.badRequestProcessed(ctx, c, err)
+		t.serverError(ctx, c, err)
 		return
 	}
 
@@ -103,11 +79,61 @@ func (t *transactionHandler) FindById(c *gin.Context) {
 	transaction, err := t.service.FindById(ctx, id)
 
 	if err != nil {
-		t.badRequestProcessed(ctx, c, err)
+		t.serverError(ctx, c, err)
 		return
 	}
 
 	t.successResponse(ctx, c, transaction)
+}
+
+// Statistics
+//
+//	@Summary		Retrieve transactions statistics by category
+//	@Schemes
+//	@Param   		by  path     string     true  "Report grouped by"       Enums(category, merchant)
+//	@Tags			statistics
+//	@Produce		json
+//	@Success		200	{array}	model.StatisticsResponse
+//	@Router			/statistics/{by} [get]
+func (t *transactionHandler) Statistics(c *gin.Context) {
+	requestID := uuid.New()
+	ctx := logger.AppendCtx(context.Background(), slog.String("requestID", requestID.String()))
+	t.log.InfoContext(ctx, "Processing find all request")
+
+	by := c.Param("by")
+	transactions, err := t.service.Statistics(ctx, by)
+
+	if err != nil {
+		t.serverError(ctx, c, err)
+		return
+	}
+
+	t.successResponse(ctx, c, transactions)
+}
+
+// MerchantExpenses
+//
+//	@Summary		Retrieve transactions statistics by category
+//	@Schemes
+//	@Param   		id  path     string     true  "Merchant ID"
+//	@Tags			statistics
+//	@Produce		json
+//	@Success		200	{array}	model.MonthExpense
+//	@Router			/merchants/{id}/expenses [get]
+func (t *transactionHandler) MerchantExpenses(c *gin.Context) {
+	requestID := uuid.New()
+	ctx := logger.AppendCtx(context.Background(), slog.String("requestID", requestID.String()))
+	t.log.InfoContext(ctx, "Processing merchant expenses request")
+
+	by := c.Param("id")
+	expensesByMonth, err := t.service.MerchantExpenses(ctx, by)
+
+	if err != nil {
+		t.serverError(ctx, c, err)
+		return
+	}
+
+	t.successResponse(ctx, c, expensesByMonth)
 }
 
 func (t *transactionHandler) notFound(ctx context.Context, c *gin.Context, message string) {
@@ -118,8 +144,8 @@ func (t *transactionHandler) badRequest(ctx context.Context, c *gin.Context, mes
 	t.logAndReturn(ctx, c, http.StatusBadRequest, gin.H{"error": message})
 }
 
-func (t *transactionHandler) badRequestProcessed(ctx context.Context, c *gin.Context, err error) {
-	t.logAndReturn(ctx, c, http.StatusBadRequest, err)
+func (t *transactionHandler) serverError(ctx context.Context, c *gin.Context, err error) {
+	t.logAndReturn(ctx, c, http.StatusInternalServerError, err)
 }
 
 func (t *transactionHandler) successResponse(ctx context.Context, c *gin.Context, res interface{}) {
@@ -128,7 +154,6 @@ func (t *transactionHandler) successResponse(ctx context.Context, c *gin.Context
 
 func (t *transactionHandler) logAndReturn(ctx context.Context, c *gin.Context, status int, res interface{}) {
 	t.log.InfoContext(ctx, fmt.Sprintf("Returned response: %v, %v", status, spew.Sdump(res)))
-
 	c.Header("Access-Control-Allow-Origin", "*")
 	c.JSON(status, res)
 

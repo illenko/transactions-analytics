@@ -15,13 +15,43 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/merchants/{id}/expenses": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "statistics"
+                ],
+                "summary": "Retrieve transactions statistics by category",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Merchant ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.MonthExpense"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/statistics/{by}": {
             "get": {
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "transaction",
                     "statistics"
                 ],
                 "summary": "Retrieve transactions statistics by category",
@@ -103,6 +133,17 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "model.MonthExpense": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "number"
+                },
+                "month": {
+                    "type": "string"
+                }
+            }
+        },
         "model.Statistics": {
             "type": "object",
             "properties": {
