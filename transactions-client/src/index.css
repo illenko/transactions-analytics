@@ -17,3 +17,7 @@ h1 {
 div.MuiCard-root {
   margin: 5px;
 }
+
+.page {
+  padding-top: 20px;
+}
