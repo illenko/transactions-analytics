@@ -19,9 +19,10 @@ type StatisticsResponse struct {
 }
 
 type Statistics struct {
-	Count  int               `json:"count"`
-	Amount float64           `json:"amount"`
-	Groups []StatisticsGroup `json:"groups"`
+	Count       int               `json:"count"`
+	Amount      float64           `json:"amount"`
+	Groups      []StatisticsGroup `json:"groups"`
+	DateAmounts []DateAmount      `json:"dateAmounts"`
 }
 
 type StatisticsGroup struct {
@@ -30,7 +31,12 @@ type StatisticsGroup struct {
 	Amount float64 `json:"amount"`
 }
 
-type MonthExpense struct {
+type MonthAmount struct {
 	Month  string  `json:"month"`
+	Amount float64 `json:"amount"`
+}
+
+type DateAmount struct {
+	Date   string  `json:"date"`
 	Amount float64 `json:"amount"`
 }

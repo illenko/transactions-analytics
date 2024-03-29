@@ -1,7 +1,6 @@
 package mapper
 
 import (
-	"github.com/illenko/transactions-service/internal/database"
 	dbmodel "github.com/illenko/transactions-service/internal/model"
 	"github.com/illenko/transactions-service/pkg/model"
 	"github.com/samber/lo"
@@ -11,13 +10,15 @@ import (
 type TransactionMapper interface {
 	ToResponse(entity dbmodel.Transaction) model.TransactionResponse
 	ToResponseList(entities []dbmodel.Transaction) []model.TransactionResponse
-	ToStatisticsResponse(income []dbmodel.StatisticsBy, expenses []dbmodel.StatisticsBy) model.StatisticsResponse
-	ToMonthExpenses(expenses []dbmodel.MerchantExpense) []model.MonthExpense
+	ToStatisticsResponse(income []dbmodel.StatisticsBy,
+		expenses []dbmodel.StatisticsBy,
+		incomeDateAmounts []dbmodel.DateAmount,
+		expensesDateAmounts []dbmodel.DateAmount) model.StatisticsResponse
+	ToMonthAmounts(expenses []dbmodel.DateAmount) []model.MonthAmount
 }
 
 type transactionMapper struct {
-	log  *slog.Logger
-	repo database.TransactionRepository
+	log *slog.Logger
 }
 
 func NewTransactionMapper(log *slog.Logger) TransactionMapper {
@@ -38,27 +39,40 @@ func (t *transactionMapper) ToResponseList(entities []dbmodel.Transaction) []mod
 	return lo.Map(entities, func(item dbmodel.Transaction, _ int) model.TransactionResponse { return t.ToResponse(item) })
 }
 
-func (t *transactionMapper) ToStatisticsResponse(income []dbmodel.StatisticsBy, expenses []dbmodel.StatisticsBy) model.StatisticsResponse {
+func (t *transactionMapper) ToStatisticsResponse(income []dbmodel.StatisticsBy,
+	expenses []dbmodel.StatisticsBy,
+	incomeDateAmounts []dbmodel.DateAmount,
+	expensesDateAmounts []dbmodel.DateAmount) model.StatisticsResponse {
 	return model.StatisticsResponse{
-		Income:   t.toStatistics(income),
-		Expenses: t.toStatistics(expenses),
+		Income:   t.toStatistics(income, incomeDateAmounts),
+		Expenses: t.toStatistics(expenses, expensesDateAmounts),
 	}
 }
 
-func (t *transactionMapper) ToMonthExpenses(expenses []dbmodel.MerchantExpense) []model.MonthExpense {
-	return lo.Map(expenses, func(item dbmodel.MerchantExpense, _ int) model.MonthExpense {
-		return model.MonthExpense{
-			Month:  item.Month.Month().String()[:3],
+func (t *transactionMapper) ToMonthAmounts(expenses []dbmodel.DateAmount) []model.MonthAmount {
+	return lo.Map(expenses, func(item dbmodel.DateAmount, _ int) model.MonthAmount {
+		return model.MonthAmount{
+			Month:  item.Date.Month().String()[:3],
 			Amount: item.Amount,
 		}
 	})
 }
 
-func (t *transactionMapper) toStatistics(entities []dbmodel.StatisticsBy) model.Statistics {
+func (t *transactionMapper) toDateAmounts(dateAmounts []dbmodel.DateAmount) []model.DateAmount {
+	return lo.Map(dateAmounts, func(item dbmodel.DateAmount, _ int) model.DateAmount {
+		return model.DateAmount{
+			Date:   item.Date.Format("01-02-2006"),
+			Amount: item.Amount,
+		}
+	})
+}
+
+func (t *transactionMapper) toStatistics(entities []dbmodel.StatisticsBy, dateAmounts []dbmodel.DateAmount) model.Statistics {
 	return model.Statistics{
-		Count:  lo.Sum(lo.Map(entities, func(item dbmodel.StatisticsBy, _ int) int { return item.Count })),
-		Amount: lo.Sum(lo.Map(entities, func(item dbmodel.StatisticsBy, _ int) float64 { return item.Amount })),
-		Groups: lo.Map(entities, func(item dbmodel.StatisticsBy, _ int) model.StatisticsGroup { return t.toStatisticsGroup(item) }),
+		Count:       lo.Sum(lo.Map(entities, func(item dbmodel.StatisticsBy, _ int) int { return item.Count })),
+		Amount:      lo.Sum(lo.Map(entities, func(item dbmodel.StatisticsBy, _ int) float64 { return item.Amount })),
+		Groups:      lo.Map(entities, func(item dbmodel.StatisticsBy, _ int) model.StatisticsGroup { return t.toStatisticsGroup(item) }),
+		DateAmounts: t.toDateAmounts(dateAmounts),
 	}
 }
 

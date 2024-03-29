@@ -8,7 +8,7 @@ type StatisticsBy struct {
 	Amount float64
 }
 
-type MerchantExpense struct {
-	Month  time.Time
+type DateAmount struct {
+	Date   time.Time
 	Amount float64
 }

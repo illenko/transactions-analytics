@@ -11,7 +11,8 @@ type TransactionRepository interface {
 	FindAll() (transactions []model.Transaction, err error)
 	FindById(id uuid.UUID) (transaction model.Transaction, err error)
 	Statistics(by string, income bool) (statistics []model.StatisticsBy, err error)
-	MerchantExpenses(merchant string) (expenses []model.MerchantExpense, err error)
+	MerchantExpenses(merchant string) (expenses []model.DateAmount, err error)
+	DateAmounts(positiveAmount bool) (expenses []model.DateAmount, err error)
 }
 
 type transactionRepository struct {
@@ -37,28 +38,48 @@ func (t *transactionRepository) FindById(id uuid.UUID) (transaction model.Transa
 }
 
 func (t *transactionRepository) Statistics(groupKey string, positiveAmount bool) (statistics []model.StatisticsBy, err error) {
-	where, order := t.statisticsParameters(positiveAmount)
-
-	result := t.db.Select(groupKey + " as name, count(id), sum(amount) as amount").Table("transactions").Where(where).Group(groupKey).Order("amount " + order).Scan(&statistics)
-
+	result := t.db.Select(groupKey + " as name, count(id), sum(amount) as amount").
+		Table("transactions").
+		Where(t.whereAmount(positiveAmount)).
+		Group(groupKey).
+		Order("amount" + t.orderDirection(positiveAmount)).
+		Scan(&statistics)
 	return statistics, result.Error
 }
 
-func (t *transactionRepository) MerchantExpenses(merchant string) (expenses []model.MerchantExpense, err error) {
-	result := t.db.Select("DATE_TRUNC('month', datetime) AS month, SUM(amount) AS amount").
-		Table("transactions").Where("merchant = ? and datetime > CURRENT_DATE - INTERVAL '6 months'", merchant).
-		Group("month").Order("month").Scan(&expenses)
-
+func (t *transactionRepository) MerchantExpenses(merchant string) (expenses []model.DateAmount, err error) {
+	result := t.db.Select("DATE_TRUNC('month', datetime) AS date, SUM(amount) AS amount").
+		Table("transactions").
+		Where("merchant = ? and datetime > CURRENT_DATE - INTERVAL '6 months'", merchant).
+		Group("month").
+		Order("month").
+		Scan(&expenses)
 	return expenses, result.Error
 }
 
-func (t *transactionRepository) statisticsParameters(positiveAmount bool) (where string, order string) {
+func (t *transactionRepository) DateAmounts(positiveAmount bool) (dateAmounts []model.DateAmount, err error) {
+	result := t.db.Select("DATE(datetime) as date, sum(sum(amount)) over (order by DATE(datetime)) as amount").
+		Table("transactions").
+		Where(t.whereAmount(positiveAmount)).
+		Group("date").
+		Order("date").
+		Scan(&dateAmounts)
+
+	return dateAmounts, result.Error
+}
+
+func (t *transactionRepository) whereAmount(positiveAmount bool) (where string) {
 	if positiveAmount {
-		where = "amount > 0"
-		order = "desc"
+		return "amount > 0"
 	} else {
-		where = "amount < 0"
-		order = "asc"
+		return "amount < 0"
 	}
-	return
+}
+
+func (t *transactionRepository) orderDirection(positiveAmount bool) (order string) {
+	if positiveAmount {
+		return " desc"
+	} else {
+		return " asc"
+	}
 }
