@@ -7,7 +7,6 @@ import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
 import ListItemAvatar from '@mui/material/ListItemAvatar';
-import Avatar from '@mui/material/Avatar';
 import PaymentIcon from '@mui/icons-material/Payment';
 import {PieChart} from "@mui/x-charts";
 
@@ -33,10 +32,10 @@ const StatisticCard: FC<StatProps> = ({title, statistics, by}) => {
                             data: statistics.groups.map((it, index) => {
                                 return {key: index, value: Math.abs(it.amount), label: it.name}
                             }),
-                            innerRadius: 70,
+                            innerRadius: 80,
                             outerRadius: 100,
-                            paddingAngle: 2,
-                            cornerRadius: 5,
+                            paddingAngle: 1,
+                            cornerRadius: 3,
                             cx: 150,
                             cy: 150,
                         },
@@ -49,9 +48,7 @@ const StatisticCard: FC<StatProps> = ({title, statistics, by}) => {
                         {statistics.groups.map(({name, amount, count}) => {
                             return <ListItem>
                                 <ListItemAvatar>
-                                    <Avatar>
-                                        <PaymentIcon/>
-                                    </Avatar>
+                                    <PaymentIcon/>
                                 </ListItemAvatar>
                                 <ListItemText primary={name}
                                               secondary={count + " transaction" + (count == 1 ? "" : "s") + ", " + amount + "$"}/>

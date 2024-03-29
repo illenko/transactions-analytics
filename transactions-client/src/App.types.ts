@@ -5,7 +5,7 @@ export interface AppProps {
 export interface TransactionEntity {
     id: string,
     datetime: string,
-    amount: string,
+    amount: number,
     category: string,
     merchant: string
 }
@@ -31,4 +31,9 @@ export interface StatProps {
     title: string;
     statistics: Statistics;
     by: string;
+}
+
+export interface MonthExpense {
+    month: string;
+    amount: number;
 }

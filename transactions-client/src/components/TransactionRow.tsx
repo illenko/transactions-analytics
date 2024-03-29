@@ -2,9 +2,10 @@ import {FC} from "react";
 import {TransactionEntity} from "../App.types.ts";
 import TableCell from "@mui/material/TableCell";
 import TableRow from "@mui/material/TableRow";
+import Button from "@mui/material/Button";
 
 
-const Transaction: FC<TransactionEntity> = ({id, datetime, amount, category, merchant}) => {
+const TransactionRow: FC<TransactionEntity> = ({id, datetime, amount, category, merchant}) => {
     return (
         <TableRow
             key={id}
@@ -16,9 +17,10 @@ const Transaction: FC<TransactionEntity> = ({id, datetime, amount, category, mer
             <TableCell>{amount}</TableCell>
             <TableCell>{category}</TableCell>
             <TableCell>{merchant}</TableCell>
+            <TableCell><Button href={`/transactions/${id}`}>View</Button></TableCell>
         </TableRow>
     );
 
 };
 
-export default Transaction;
+export default TransactionRow;
