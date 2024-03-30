@@ -51,8 +51,8 @@ func (t *transactionRepository) MerchantExpenses(merchant string) (expenses []mo
 	result := t.db.Select("DATE_TRUNC('month', datetime) AS date, SUM(amount) AS amount").
 		Table("transactions").
 		Where("merchant = ? and datetime > CURRENT_DATE - INTERVAL '6 months'", merchant).
-		Group("month").
-		Order("month").
+		Group("date").
+		Order("date").
 		Scan(&expenses)
 	return expenses, result.Error
 }
