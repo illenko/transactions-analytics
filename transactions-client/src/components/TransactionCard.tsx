@@ -1,5 +1,5 @@
 import {FC, useEffect, useState} from "react";
-import {MonthExpense, TransactionEntity} from "../App.types";
+import {MonthAmount, TransactionEntity} from "../App.types";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
@@ -14,7 +14,7 @@ const chartSetting = {
 const valueFormatter = (value: number | null) => `${value} $`;
 
 const TransactionCard: FC<TransactionEntity> = ({id, datetime, amount, category, merchant}) => {
-    const [expenses, setExpenses] = useState<MonthExpense[]>([]);
+    const [expenses, setExpenses] = useState<MonthAmount[]>([]);
 
     useEffect(() => {
         const getExpenses = async () => {

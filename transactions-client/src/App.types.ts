@@ -19,6 +19,7 @@ export interface Statistics {
     count: number;
     amount: number;
     groups: StatisticsGroup[];
+    dateAmounts: DateAmount[];
 }
 
 export interface StatisticsGroup {
@@ -28,12 +29,17 @@ export interface StatisticsGroup {
 }
 
 export interface StatProps {
-    title: string;
+    title: string;  
     statistics: Statistics;
     by: string;
 }
 
-export interface MonthExpense {
+export interface MonthAmount {
     month: string;
+    amount: number;
+}
+
+export interface DateAmount {
+    date: string;
     amount: number;
 }

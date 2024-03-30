@@ -8,28 +8,31 @@ import StatisticCard from "../components/StatisticCard.tsx";
 
 const Statistics: FC<AppProps> = () => {
     const [statistics, setStatistics] = useState<StatisticsResult>();
+    const [by, setBy] = useState<string>();
 
     const showStatisticsByCategory = async () => {
         try {
             const {data} = await axios.get('http://localhost:8080/statistics/category');
             setStatistics(data);
+            setBy("categories")
         } catch (error) {
             console.error(error);
         }
     };
-    useEffect(() => {
-        showStatisticsByCategory();
-    }, []);
-    
 
     const showStatisticsByMerchant = async () => {
         try {
             const {data} = await axios.get('http://localhost:8080/statistics/merchant');
             setStatistics(data);
+            setBy("merchants")
         } catch (error) {
             console.log(error);
         }
     };
+
+    useEffect(() => {
+        showStatisticsByCategory();
+    }, []);
 
     return (
         <Container maxWidth="lg">
@@ -39,15 +42,11 @@ const Statistics: FC<AppProps> = () => {
             </Stack>
             <Stack justifyContent="center" paddingTop={2} spacing={2} direction="row">
                 {(() => {
-                    if (statistics) {
-                        return <StatisticCard title={"Expenses"} statistics={statistics.expenses}
-                                              by={"categories"}></StatisticCard>
-                    }
-                })()}
-                {(() => {
-                    if (statistics) {
-                        return <StatisticCard title={"Income"} statistics={statistics.income}
-                                              by={"categories"}></StatisticCard>
+                    if (statistics && by) {
+                        return <>
+                            <StatisticCard title={"Expenses"} statistics={statistics.expenses} by={by}></StatisticCard>
+                            <StatisticCard title={"Income"} statistics={statistics.income} by={by}></StatisticCard>
+                        </>
                     }
                 })()}
             </Stack>

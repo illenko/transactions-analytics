@@ -8,7 +8,7 @@ import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
 import ListItemAvatar from '@mui/material/ListItemAvatar';
 import PaymentIcon from '@mui/icons-material/Payment';
-import {PieChart} from "@mui/x-charts";
+import {LineChart, PieChart} from "@mui/x-charts";
 
 const StatisticCard: FC<StatProps> = ({title, statistics, by}) => {
     return (
@@ -42,6 +42,27 @@ const StatisticCard: FC<StatProps> = ({title, statistics, by}) => {
                     ]}
                     width={400}
                     height={300}
+                />
+                <LineChart
+                    width={500}
+                    height={300}
+                    series={[
+                        {
+                            data: statistics.dateAmounts.map(it => {
+                                return Math.abs(it.amount)
+                            })
+                        },
+                    ]}
+                    xAxis={[{
+                        scaleType: 'point', data: statistics.dateAmounts.map(it => {
+                            return it.date + ''
+                        })
+                    }]}
+                    sx={{
+                        '.MuiLineElement-root, .MuiMarkElement-root': {
+                            strokeWidth: 1,
+                        },
+                    }}
                 />
                 <Typography sx={{fontSize: 14}} component="div">
                     <List sx={{width: '100%', maxWidth: 360, bgcolor: 'background.paper'}}>
