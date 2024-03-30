@@ -13,30 +13,14 @@ type TransactionResponse struct {
 	Merchant string    `json:"merchant"`
 }
 
-type StatisticsResponse struct {
-	Income   Statistics `json:"income"`
-	Expenses Statistics `json:"expenses"`
+type Analytic struct {
+	Count  int             `json:"count"`
+	Amount float64         `json:"amount"`
+	Groups []AnalyticGroup `json:"groups"`
 }
 
-type Statistics struct {
-	Count       int               `json:"count"`
-	Amount      float64           `json:"amount"`
-	Groups      []StatisticsGroup `json:"groups"`
-	DateAmounts []DateAmount      `json:"dateAmounts"`
-}
-
-type StatisticsGroup struct {
+type AnalyticGroup struct {
 	Name   string  `json:"name"`
 	Count  int     `json:"count"`
-	Amount float64 `json:"amount"`
-}
-
-type MonthAmount struct {
-	Month  string  `json:"month"`
-	Amount float64 `json:"amount"`
-}
-
-type DateAmount struct {
-	Date   string  `json:"date"`
 	Amount float64 `json:"amount"`
 }

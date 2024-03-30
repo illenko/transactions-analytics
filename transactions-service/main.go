@@ -23,9 +23,13 @@ func main() {
 			config.Get,
 			database.NewConnection,
 			database.NewTransactionRepository,
+			database.NewAnalyticRepository,
 			mapper.NewTransactionMapper,
+			mapper.NewAnalyticMapper,
 			service.NewTransactionService,
+			service.NewAnalyticService,
 			handler.NewTransactionHandler,
+			handler.NewAnalyticHandler,
 			server.New,
 		),
 		fx.Invoke(func(e *gin.Engine, config config.AppConfig) {

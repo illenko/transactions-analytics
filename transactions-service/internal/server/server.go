@@ -8,12 +8,14 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
-func New(handler handler.TransactionHandler) *gin.Engine {
+func New(transactionHandler handler.TransactionHandler, analyticHandler handler.AnalyticHandler) *gin.Engine {
 	e := gin.Default()
-	e.GET("/transactions", handler.FindAll)
-	e.GET("/transactions/:id", handler.FindById)
-	e.GET("/statistics/:by", handler.Statistics)
-	e.GET("/merchants/:id/expenses", handler.MerchantExpenses)
+	e.GET("/transactions", transactionHandler.FindAll)
+	e.GET("/transactions/:id", transactionHandler.FindById)
+	e.GET("/analytic/income", analyticHandler.Income)
+	e.GET("/analytic/expenses", analyticHandler.Expenses)
+	e.GET("/analytic/income", analyticHandler.IncomeDates)
+	e.GET("/analytic/expenses", analyticHandler.ExpensesDates)
 	docs.SwaggerInfo.BasePath = "/"
 	e.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 	return e

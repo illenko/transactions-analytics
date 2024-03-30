@@ -2,13 +2,14 @@ package model
 
 import "time"
 
-type StatisticsBy struct {
+type AnalyticItem struct {
 	Name   string
 	Count  int
 	Amount float64
 }
 
-type DateAmount struct {
+type DateAnalyticItem struct {
 	Date   time.Time
+	Count  int
 	Amount float64
 }
