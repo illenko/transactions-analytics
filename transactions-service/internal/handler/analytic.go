@@ -35,11 +35,15 @@ func NewAnalyticHandler(log *slog.Logger, service service.AnalyticService) Analy
 
 var groups = []string{"category", "merchant"}
 var units = []string{"day", "month"}
+var valueTypes = []string{"absolute", "cumulative"}
 
-const defaultGroupBy = "category"
-const defaultUnit = "month"
-const defaultDayPeriod = 7
-const defaultMonthPeriod = 6
+const (
+	defaultGroupBy     = "category"
+	defaultUnit        = "month"
+	defaultDayPeriod   = 7
+	defaultMonthPeriod = 6
+	defaultValueType   = "absolute"
+)
 
 func (h *analyticHandler) Income(c *gin.Context) {
 	h.analytic(c, "income")
@@ -83,10 +87,9 @@ func (h *analyticHandler) analyticDates(c *gin.Context, analyticType string) {
 		unit = defaultUnit
 	}
 
-	periodString, ok := c.GetQuery("period")
-	period, err := strconv.Atoi(periodString)
+	period, err := strconv.Atoi(c.Query("period"))
 
-	if !ok || err != nil || period < 0 {
+	if err != nil || period < 0 {
 		if unit == "day" {
 			period = defaultDayPeriod
 		} else {
@@ -94,7 +97,13 @@ func (h *analyticHandler) analyticDates(c *gin.Context, analyticType string) {
 		}
 	}
 
-	result, err := h.service.AnalyticByDates(ctx, analyticType, unit, period, c.Query("category"), c.Query("merchant"))
+	valueType, ok := c.GetQuery("valueType")
+
+	if !ok || !lo.Contains(valueTypes, valueType) {
+		valueType = defaultValueType
+	}
+
+	result, err := h.service.AnalyticByDates(ctx, analyticType, unit, period, c.Query("category"), c.Query("merchant"), valueType)
 
 	if err != nil {
 		h.serverError(ctx, c, err)
