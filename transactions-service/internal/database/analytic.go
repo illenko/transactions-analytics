@@ -4,12 +4,12 @@ import (
 	"github.com/illenko/transactions-service/internal/model"
 	"gorm.io/gorm"
 	"log/slog"
+	"strconv"
 )
 
 type AnalyticRepository interface {
 	Find(groupBy string, positiveAmount bool) (analyticItems []model.AnalyticItem, err error)
-	FindByDates(positiveAmount bool, unit string,
-		period int, category *string, merchant *string) (expenses []model.DateAnalyticItem, err error)
+	FindByDates(positiveAmount bool, unit string, period int, category string, merchant string) (expenses []model.DateAnalyticItem, err error)
 }
 
 type analyticRepository struct {
@@ -26,43 +26,39 @@ func NewAnalyticRepository(log *slog.Logger, db *gorm.DB) AnalyticRepository {
 
 func (r *analyticRepository) Find(groupBy string, positiveAmount bool) (analyticItems []model.AnalyticItem, err error) {
 	result := r.db.Select(groupBy + " as name, count(id), sum(amount) as amount").
-		Table("analytics").
+		Table("transactions").
 		Where(r.whereAmount(positiveAmount)).
-		Group(groupBy).
+		Group("name").
 		Order("amount" + r.orderDirection(positiveAmount)).
 		Scan(&analyticItems)
 	return analyticItems, result.Error
 }
 
-func (r *analyticRepository) FindByDates(positiveAmount bool, unit string, period int, category *string, merchant *string) (expenses []model.DateAnalyticItem, err error) {
-	//TODO implement me
-	panic("implement me")
+func (r *analyticRepository) FindByDates(positiveAmount bool, unit string, period int, category string, merchant string) (items []model.DateAnalyticItem, err error) {
+	result := r.db.Select("DATE_TRUNC('"+unit+"', datetime) AS name, count(*) as count, SUM(amount) AS amount").
+		Table("transactions").
+		Where("datetime > CURRENT_DATE - INTERVAL '"+strconv.Itoa(period)+" "+unit+"s'", merchant).
+		Where(r.whereAmount(positiveAmount)).
+		Group("name").
+		Order("name").
+		Scan(&items)
+	return items, result.Error
 }
 
-func (t *analyticRepository) Analytic(groupKey string, positiveAmount bool) (statistics []model.AnalyticItem, err error) {
-	result := t.db.Select(groupKey + " as name, count(id), sum(amount) as amount").
+func (r *analyticRepository) Analytic(groupKey string, positiveAmount bool) (statistics []model.AnalyticItem, err error) {
+	result := r.db.Select(groupKey + " as name, count(id), sum(amount) as amount").
 		Table("analytics").
-		Where(t.whereAmount(positiveAmount)).
+		Where(r.whereAmount(positiveAmount)).
 		Group(groupKey).
-		Order("amount" + t.orderDirection(positiveAmount)).
+		Order("amount" + r.orderDirection(positiveAmount)).
 		Scan(&statistics)
 	return statistics, result.Error
 }
 
-func (t *analyticRepository) MerchantExpenses(merchant string) (expenses []model.AnalyticItem, err error) {
-	result := t.db.Select("DATE_TRUNC('month', datetime) AS date, SUM(amount) AS amount").
+func (r *analyticRepository) DateAmounts(positiveAmount bool) (dateAmounts []model.AnalyticItem, err error) {
+	result := r.db.Select("DATE(datetime) as date, sum(sum(amount)) over (order by DATE(datetime)) as amount").
 		Table("analytics").
-		Where("merchant = ? and datetime > CURRENT_DATE - INTERVAL '6 months'", merchant).
-		Group("date").
-		Order("date").
-		Scan(&expenses)
-	return expenses, result.Error
-}
-
-func (t *analyticRepository) DateAmounts(positiveAmount bool) (dateAmounts []model.AnalyticItem, err error) {
-	result := t.db.Select("DATE(datetime) as date, sum(sum(amount)) over (order by DATE(datetime)) as amount").
-		Table("analytics").
-		Where(t.whereAmount(positiveAmount)).
+		Where(r.whereAmount(positiveAmount)).
 		Group("date").
 		Order("date").
 		Scan(&dateAmounts)
@@ -70,7 +66,7 @@ func (t *analyticRepository) DateAmounts(positiveAmount bool) (dateAmounts []mod
 	return dateAmounts, result.Error
 }
 
-func (t *analyticRepository) whereAmount(positiveAmount bool) (where string) {
+func (r *analyticRepository) whereAmount(positiveAmount bool) (where string) {
 	if positiveAmount {
 		return "amount > 0"
 	} else {
@@ -78,7 +74,7 @@ func (t *analyticRepository) whereAmount(positiveAmount bool) (where string) {
 	}
 }
 
-func (t *analyticRepository) orderDirection(positiveAmount bool) (order string) {
+func (r *analyticRepository) orderDirection(positiveAmount bool) (order string) {
 	if positiveAmount {
 		return " desc"
 	} else {

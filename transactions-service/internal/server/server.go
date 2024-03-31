@@ -14,8 +14,8 @@ func New(transactionHandler handler.TransactionHandler, analyticHandler handler.
 	e.GET("/transactions/:id", transactionHandler.FindById)
 	e.GET("/analytic/income", analyticHandler.Income)
 	e.GET("/analytic/expenses", analyticHandler.Expenses)
-	e.GET("/analytic/income", analyticHandler.IncomeDates)
-	e.GET("/analytic/expenses", analyticHandler.ExpensesDates)
+	e.GET("/analytic/income/dates", analyticHandler.IncomeDates)
+	e.GET("/analytic/expenses/dates", analyticHandler.ExpensesDates)
 	docs.SwaggerInfo.BasePath = "/"
 	e.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 	return e
