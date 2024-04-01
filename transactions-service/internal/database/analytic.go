@@ -4,13 +4,12 @@ import (
 	"github.com/illenko/transactions-service/internal/model"
 	"gorm.io/gorm"
 	"log/slog"
-	"strconv"
 )
 
 type AnalyticRepository interface {
 	Find(groupBy string, positiveAmount bool) (analyticItems []model.AnalyticItem, err error)
-	FindByDates(positiveAmount bool, unit string, period int, category string, merchant string) (expenses []model.DateAnalyticItem, err error)
-	FindByDatesCumulative(positiveAmount bool, unit string, period int, category string, merchant string) (items []model.DateAnalyticItem, err error)
+	FindByDates(positiveAmount bool, unit string, category string, merchant string) (expenses []model.DateAnalyticItem, err error)
+	FindByDatesCumulative(positiveAmount bool, unit string, category string, merchant string) (items []model.DateAnalyticItem, err error)
 }
 
 type analyticRepository struct {
@@ -35,10 +34,9 @@ func (r *analyticRepository) Find(groupBy string, positiveAmount bool) (analytic
 	return analyticItems, result.Error
 }
 
-func (r *analyticRepository) FindByDates(positiveAmount bool, unit string, period int, category string, merchant string) (items []model.DateAnalyticItem, err error) {
-	result := r.db.Select("DATE_TRUNC('" + unit + "', datetime) AS date, count(*) as count, SUM(amount) AS amount").
+func (r *analyticRepository) FindByDates(positiveAmount bool, unit string, category string, merchant string) (items []model.DateAnalyticItem, err error) {
+	result := r.db.Select("DATE_TRUNC('" + unit + "', datetime) AS date, count(amount) as count, SUM(amount) AS amount").
 		Table("transactions").
-		Where("datetime > CURRENT_DATE - INTERVAL '" + strconv.Itoa(period) + " " + unit + "s'").
 		Where(r.whereAmount(positiveAmount)).
 		Where(r.optionalWhere("category", category)).
 		Where(r.optionalWhere("merchant", merchant)).
@@ -48,10 +46,9 @@ func (r *analyticRepository) FindByDates(positiveAmount bool, unit string, perio
 	return items, result.Error
 }
 
-func (r *analyticRepository) FindByDatesCumulative(positiveAmount bool, unit string, period int, category string, merchant string) (items []model.DateAnalyticItem, err error) {
-	result := r.db.Select("DATE_TRUNC('" + unit + "', datetime) AS date, SUM(SUM(amount)) OVER (ORDER BY DATE_TRUNC('" + unit + "', datetime)) AS amount").
+func (r *analyticRepository) FindByDatesCumulative(positiveAmount bool, unit string, category string, merchant string) (items []model.DateAnalyticItem, err error) {
+	result := r.db.Select("DATE_TRUNC('" + unit + "', datetime) AS date, SUM(count(amount)) OVER (ORDER BY DATE_TRUNC('" + unit + "', datetime)) AS count, SUM(SUM(amount)) OVER (ORDER BY DATE_TRUNC('" + unit + "', datetime)) AS amount").
 		Table("transactions").
-		Where("datetime > CURRENT_DATE - INTERVAL '" + strconv.Itoa(period) + " " + unit + "s'").
 		Where(r.whereAmount(positiveAmount)).
 		Where(r.optionalWhere("category", category)).
 		Where(r.optionalWhere("merchant", merchant)).

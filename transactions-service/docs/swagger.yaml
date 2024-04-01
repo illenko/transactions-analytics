@@ -1,23 +1,5 @@
 definitions:
-  model.MonthExpense:
-    properties:
-      amount:
-        type: number
-      month:
-        type: string
-    type: object
-  model.Statistics:
-    properties:
-      amount:
-        type: number
-      count:
-        type: integer
-      groups:
-        items:
-          $ref: '#/definitions/model.StatisticsGroup'
-        type: array
-    type: object
-  model.StatisticsGroup:
+  model.AnalyticGroup:
     properties:
       amount:
         type: number
@@ -26,12 +8,16 @@ definitions:
       name:
         type: string
     type: object
-  model.StatisticsResponse:
+  model.AnalyticResponse:
     properties:
-      expenses:
-        $ref: '#/definitions/model.Statistics'
-      income:
-        $ref: '#/definitions/model.Statistics'
+      amount:
+        type: number
+      count:
+        type: integer
+      groups:
+        items:
+          $ref: '#/definitions/model.AnalyticGroup'
+        type: array
     type: object
   model.TransactionResponse:
     properties:
@@ -51,13 +37,24 @@ info:
   title: Transactions Service API
   version: "1.0"
 paths:
-  /merchants/{id}/expenses:
+  /analytic/expenses/dates:
     get:
       parameters:
-      - description: Merchant ID
-        in: path
-        name: id
-        required: true
+      - default: month
+        description: Date unit
+        enum:
+        - month
+        - day
+        in: query
+        name: unit
+        type: string
+      - description: Category for filtering
+        in: query
+        name: category
+        type: string
+      - description: Merchant for filtering
+        in: query
+        name: merchant
         type: string
       produces:
       - application/json
@@ -66,21 +63,21 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/model.MonthExpense'
+              $ref: '#/definitions/model.AnalyticResponse'
             type: array
-      summary: Retrieve transactions statistics by category
+      summary: Expenses analytic for dates
       tags:
-      - statistics
-  /statistics/{by}:
+      - expenses
+  /analytic/expenses/groups:
     get:
       parameters:
-      - description: Report grouped by
+      - default: category
+        description: Grouping field
         enum:
         - category
         - merchant
-        in: path
-        name: by
-        required: true
+        in: query
+        name: groupBy
         type: string
       produces:
       - application/json
@@ -89,11 +86,65 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/model.StatisticsResponse'
+              $ref: '#/definitions/model.AnalyticResponse'
             type: array
-      summary: Retrieve transactions statistics by category
+      summary: Expenses analytic for groups
       tags:
-      - statistics
+      - expenses
+  /analytic/income/dates:
+    get:
+      parameters:
+      - default: month
+        description: Date unit
+        enum:
+        - month
+        - day
+        in: query
+        name: unit
+        type: string
+      - description: Category for filtering
+        in: query
+        name: category
+        type: string
+      - description: Merchant for filtering
+        in: query
+        name: merchant
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.AnalyticResponse'
+            type: array
+      summary: Income analytic for dates
+      tags:
+      - income
+  /analytic/income/groups:
+    get:
+      parameters:
+      - default: category
+        description: Grouping field
+        enum:
+        - category
+        - merchant
+        in: query
+        name: groupBy
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.AnalyticResponse'
+            type: array
+      summary: Income analytic for groups
+      tags:
+      - income
   /transactions:
     get:
       produces:

@@ -15,22 +15,38 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/merchants/{id}/expenses": {
+        "/analytic/expenses/dates": {
             "get": {
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "statistics"
+                    "expenses"
                 ],
-                "summary": "Retrieve transactions statistics by category",
+                "summary": "Expenses analytic for dates",
                 "parameters": [
                     {
+                        "enum": [
+                            "month",
+                            "day"
+                        ],
                         "type": "string",
-                        "description": "Merchant ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
+                        "default": "month",
+                        "description": "Date unit",
+                        "name": "unit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Category for filtering",
+                        "name": "category",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Merchant for filtering",
+                        "name": "merchant",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -39,22 +55,22 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/model.MonthExpense"
+                                "$ref": "#/definitions/model.AnalyticResponse"
                             }
                         }
                     }
                 }
             }
         },
-        "/statistics/{by}": {
+        "/analytic/expenses/groups": {
             "get": {
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "statistics"
+                    "expenses"
                 ],
-                "summary": "Retrieve transactions statistics by category",
+                "summary": "Expenses analytic for groups",
                 "parameters": [
                     {
                         "enum": [
@@ -62,10 +78,10 @@ const docTemplate = `{
                             "merchant"
                         ],
                         "type": "string",
-                        "description": "Report grouped by",
-                        "name": "by",
-                        "in": "path",
-                        "required": true
+                        "default": "category",
+                        "description": "Grouping field",
+                        "name": "groupBy",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -74,7 +90,89 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/model.StatisticsResponse"
+                                "$ref": "#/definitions/model.AnalyticResponse"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/analytic/income/dates": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "income"
+                ],
+                "summary": "Income analytic for dates",
+                "parameters": [
+                    {
+                        "enum": [
+                            "month",
+                            "day"
+                        ],
+                        "type": "string",
+                        "default": "month",
+                        "description": "Date unit",
+                        "name": "unit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Category for filtering",
+                        "name": "category",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Merchant for filtering",
+                        "name": "merchant",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.AnalyticResponse"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/analytic/income/groups": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "income"
+                ],
+                "summary": "Income analytic for groups",
+                "parameters": [
+                    {
+                        "enum": [
+                            "category",
+                            "merchant"
+                        ],
+                        "type": "string",
+                        "default": "category",
+                        "description": "Grouping field",
+                        "name": "groupBy",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.AnalyticResponse"
                             }
                         }
                     }
@@ -133,35 +231,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "model.MonthExpense": {
-            "type": "object",
-            "properties": {
-                "amount": {
-                    "type": "number"
-                },
-                "month": {
-                    "type": "string"
-                }
-            }
-        },
-        "model.Statistics": {
-            "type": "object",
-            "properties": {
-                "amount": {
-                    "type": "number"
-                },
-                "count": {
-                    "type": "integer"
-                },
-                "groups": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/model.StatisticsGroup"
-                    }
-                }
-            }
-        },
-        "model.StatisticsGroup": {
+        "model.AnalyticGroup": {
             "type": "object",
             "properties": {
                 "amount": {
@@ -175,14 +245,20 @@ const docTemplate = `{
                 }
             }
         },
-        "model.StatisticsResponse": {
+        "model.AnalyticResponse": {
             "type": "object",
             "properties": {
-                "expenses": {
-                    "$ref": "#/definitions/model.Statistics"
+                "amount": {
+                    "type": "number"
                 },
-                "income": {
-                    "$ref": "#/definitions/model.Statistics"
+                "count": {
+                    "type": "integer"
+                },
+                "groups": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.AnalyticGroup"
+                    }
                 }
             }
         },

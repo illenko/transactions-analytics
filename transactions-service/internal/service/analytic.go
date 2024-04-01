@@ -10,8 +10,8 @@ import (
 )
 
 type AnalyticService interface {
-	Analytic(ctx context.Context, analyticType string, groupBy string) (model.Analytic, error)
-	AnalyticByDates(ctx context.Context, analyticType string, unit string, period int, category string, merchant string, valueType string) (analytic model.Analytic, err error)
+	Analytic(ctx context.Context, analyticType string, groupBy string) (model.AnalyticResponse, error)
+	AnalyticByDates(ctx context.Context, analyticType string, unit string, category string, merchant string, valueType string) (analytic model.AnalyticResponse, err error)
 }
 
 type analyticService struct {
@@ -28,28 +28,35 @@ func NewAnalyticService(log *slog.Logger, repo database.AnalyticRepository, mapp
 	}
 }
 
-func (s *analyticService) Analytic(ctx context.Context, analyticType string, groupBy string) (model.Analytic, error) {
+func (s *analyticService) Analytic(ctx context.Context, analyticType string, groupBy string) (model.AnalyticResponse, error) {
 	analyticItems, err := s.repo.Find(groupBy, s.resolveAmount(analyticType))
 	if err != nil {
 		s.log.ErrorContext(ctx, "When retrieving income transaction statistics")
-		return model.Analytic{}, err
+		return model.AnalyticResponse{}, err
 	}
 	return s.mapper.ToResponse(analyticItems), nil
 }
 
-func (s *analyticService) AnalyticByDates(ctx context.Context, analyticType string, unit string, period int, category string, merchant string, valueType string) (analytic model.Analytic, err error) {
+func (s *analyticService) AnalyticByDates(ctx context.Context, analyticType string, unit string, category string, merchant string, valueType string) (analytic model.AnalyticResponse, err error) {
+	analyticItems, err := s.getAnalyticByDates(valueType, analyticType, unit, category, merchant)
 
-	var analyticItems []dbmodel.DateAnalyticItem
-	if valueType == "absolute" {
-		analyticItems, err = s.repo.FindByDates(s.resolveAmount(analyticType), unit, period, category, merchant)
-	} else {
-		analyticItems, err = s.repo.FindByDatesCumulative(s.resolveAmount(analyticType), unit, period, category, merchant)
-	}
 	if err != nil {
 		s.log.ErrorContext(ctx, "When retrieving income transaction statistics by dates")
-		return model.Analytic{}, err
+		return model.AnalyticResponse{}, err
 	}
 
+	return s.resolveMappingByUnit(unit, analyticItems)
+}
+
+func (s *analyticService) getAnalyticByDates(valueType string, analyticType string, unit string, category string, merchant string) ([]dbmodel.DateAnalyticItem, error) {
+	if valueType == "absolute" {
+		return s.repo.FindByDates(s.resolveAmount(analyticType), unit, category, merchant)
+	} else {
+		return s.repo.FindByDatesCumulative(s.resolveAmount(analyticType), unit, category, merchant)
+	}
+}
+
+func (s *analyticService) resolveMappingByUnit(unit string, analyticItems []dbmodel.DateAnalyticItem) (model.AnalyticResponse, error) {
 	if unit == "day" {
 		return s.mapper.ToDayResponse(analyticItems), nil
 	} else {

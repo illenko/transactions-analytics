@@ -11,7 +11,6 @@ import (
 	"github.com/samber/lo"
 	"log/slog"
 	"net/http"
-	"strconv"
 )
 
 type AnalyticHandler interface {
@@ -33,30 +32,66 @@ func NewAnalyticHandler(log *slog.Logger, service service.AnalyticService) Analy
 	}
 }
 
+type Groups string
+
 var groups = []string{"category", "merchant"}
 var units = []string{"day", "month"}
 var valueTypes = []string{"absolute", "cumulative"}
 
 const (
-	defaultGroupBy     = "category"
-	defaultUnit        = "month"
-	defaultDayPeriod   = 7
-	defaultMonthPeriod = 6
-	defaultValueType   = "absolute"
+	defaultGroupBy   = "category"
+	defaultUnit      = "month"
+	defaultValueType = "absolute"
 )
 
+// Income
+//
+//	@Summary	    Income analytic for groups
+//	@Param   		groupBy  query     string     false  "Grouping field"       default(category) Enums(category, merchant)
+//	@Tags			income
+//	@Produce		json
+//	@Success		200	{array}	model.AnalyticResponse
+//	@Router			/analytic/income/groups [get]
 func (h *analyticHandler) Income(c *gin.Context) {
 	h.analytic(c, "income")
 }
 
+// Expenses
+//
+//	@Summary	    Expenses analytic for groups
+//	@Param   		groupBy  query     string     false  "Grouping field"       default(category) Enums(category, merchant)
+//	@Tags			expenses
+//	@Produce		json
+//	@Success		200	{array}	model.AnalyticResponse
+//	@Router			/analytic/expenses/groups [get]
 func (h *analyticHandler) Expenses(c *gin.Context) {
 	h.analytic(c, "expenses")
 }
 
+// IncomeDates
+//
+//	@Summary	    Income analytic for dates
+//	@Param   		unit  query     string     false  "Date unit"       default(month) Enums(month, day)
+//	@Param   		category  query     string     false  "Category for filtering"
+//	@Param   		merchant  query     string     false  "Merchant for filtering"
+//	@Tags			income
+//	@Produce		json
+//	@Success		200	{array}	model.AnalyticResponse
+//	@Router			/analytic/income/dates [get]
 func (h *analyticHandler) IncomeDates(c *gin.Context) {
 	h.analyticDates(c, "income")
 }
 
+// ExpensesDates
+//
+//	@Summary	    Expenses analytic for dates
+//	@Param   		unit  query     string     false  "Date unit"       default(month) Enums(month, day)
+//	@Param   		category  query     string     false  "Category for filtering"
+//	@Param   		merchant  query     string     false  "Merchant for filtering"
+//	@Tags			expenses
+//	@Produce		json
+//	@Success		200	{array}	model.AnalyticResponse
+//	@Router			/analytic/expenses/dates [get]
 func (h *analyticHandler) ExpensesDates(c *gin.Context) {
 	h.analyticDates(c, "expenses")
 }
@@ -87,23 +122,13 @@ func (h *analyticHandler) analyticDates(c *gin.Context, analyticType string) {
 		unit = defaultUnit
 	}
 
-	period, err := strconv.Atoi(c.Query("period"))
-
-	if err != nil || period < 0 {
-		if unit == "day" {
-			period = defaultDayPeriod
-		} else {
-			period = defaultMonthPeriod
-		}
-	}
-
 	valueType, ok := c.GetQuery("valueType")
 
 	if !ok || !lo.Contains(valueTypes, valueType) {
 		valueType = defaultValueType
 	}
 
-	result, err := h.service.AnalyticByDates(ctx, analyticType, unit, period, c.Query("category"), c.Query("merchant"), valueType)
+	result, err := h.service.AnalyticByDates(ctx, analyticType, unit, c.Query("category"), c.Query("merchant"), valueType)
 
 	if err != nil {
 		h.serverError(ctx, c, err)
@@ -115,10 +140,6 @@ func (h *analyticHandler) analyticDates(c *gin.Context, analyticType string) {
 
 func (h *analyticHandler) buildContext() context.Context {
 	return logger.AppendCtx(context.Background(), slog.String("requestID", uuid.New().String()))
-}
-
-func (h *analyticHandler) badRequest(ctx context.Context, c *gin.Context, message string) {
-	h.logAndReturn(ctx, c, http.StatusBadRequest, gin.H{"error": message})
 }
 
 func (h *analyticHandler) serverError(ctx context.Context, c *gin.Context, err error) {

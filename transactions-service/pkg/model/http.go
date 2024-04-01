@@ -13,7 +13,7 @@ type TransactionResponse struct {
 	Merchant string    `json:"merchant"`
 }
 
-type Analytic struct {
+type AnalyticResponse struct {
 	Count  int             `json:"count"`
 	Amount float64         `json:"amount"`
 	Groups []AnalyticGroup `json:"groups"`

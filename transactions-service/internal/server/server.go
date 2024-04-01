@@ -12,8 +12,8 @@ func New(transactionHandler handler.TransactionHandler, analyticHandler handler.
 	e := gin.Default()
 	e.GET("/transactions", transactionHandler.FindAll)
 	e.GET("/transactions/:id", transactionHandler.FindById)
-	e.GET("/analytic/income", analyticHandler.Income)
-	e.GET("/analytic/expenses", analyticHandler.Expenses)
+	e.GET("/analytic/income/groups", analyticHandler.Income)
+	e.GET("/analytic/expenses/groups", analyticHandler.Expenses)
 	e.GET("/analytic/income/dates", analyticHandler.IncomeDates)
 	e.GET("/analytic/expenses/dates", analyticHandler.ExpensesDates)
 	docs.SwaggerInfo.BasePath = "/"
