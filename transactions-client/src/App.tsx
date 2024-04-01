@@ -6,6 +6,7 @@ import {AppProps} from "./App.types";
 import Statistics from "./pages/Statistics";
 import {createTheme, ThemeProvider} from "@mui/material";
 import Transaction from "./pages/Transaction";
+import AnalyticDates from "./pages/AnalyticGroups.tsx";
 
 const theme = createTheme({
     components: {
@@ -29,6 +30,8 @@ const App: FC<AppProps> = ({title}) => {
                         <Route path="/transactions" element={<Transactions title={title}/>}/>
                         <Route path="/transactions/:id" element={<Transaction title={title}/>}/>
                         <Route path="/statistics" element={<Statistics title={"Statistics"}/>}/>
+                        <Route path="/analytic-groups" element={<AnalyticDates title={"Statistics"}/>}/>
+                        <Route path="/analytic-dates" element={<Statistics title={"Statistics"}/>}/>
                     </Route>
                 </Routes>
             </BrowserRouter>

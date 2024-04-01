@@ -43,3 +43,15 @@ export interface DateAmount {
     date: string;
     amount: number;
 }
+
+export interface Analytic {
+    count: number
+    amount: number
+    groups: AnalyticGroup[]
+}
+
+export interface AnalyticGroup {
+    name: string
+    count: number
+    amount: number
+}

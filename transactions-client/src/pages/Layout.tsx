@@ -7,7 +7,7 @@ import Button from "@mui/material/Button";
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 
 const Layout = () => {
-    const pages = ['Transactions', 'Statistics'];
+    const pages = ['Transactions', 'Statistics', "Analytic-Groups", "Analytic-Dates"];
 
     return (
         <Box>
