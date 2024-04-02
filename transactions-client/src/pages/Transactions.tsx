@@ -1,5 +1,5 @@
 import {FC, useEffect, useState} from "react";
-import {AppProps, TransactionEntity} from "../App.types.ts";
+import {Transaction} from "../App.types.ts";
 import axios from "axios";
 import Container from "@mui/material/Container";
 import TableContainer from "@mui/material/TableContainer";
@@ -11,9 +11,9 @@ import TableCell from "@mui/material/TableCell";
 import TableBody from "@mui/material/TableBody";
 import TransactionRow from "../components/TransactionRow.tsx";
 
-const Transactions: FC<AppProps> = () => {
-    const [transactions, setTransactions] = useState<TransactionEntity[]>([]);
-    
+const Transactions: FC = () => {
+    const [transactions, setTransactions] = useState<Transaction[]>([]);
+
     useEffect(() => {
         const getTransactions = async () => {
             try {
@@ -39,13 +39,13 @@ const Transactions: FC<AppProps> = () => {
                                     <TableCell>Amount</TableCell>
                                     <TableCell>Category</TableCell>
                                     <TableCell>Merchant</TableCell>
-                                    <TableCell>View</TableCell>
                                 </TableRow>
                             </TableHead>
                             <TableBody>
                                 {transactions.map(({id, datetime, amount, category, merchant}) => {
-                                    return <TransactionRow id={id} datetime={datetime} amount={amount} category={category}
-                                                            merchant={merchant}/>;
+                                    return <TransactionRow id={id} datetime={datetime} amount={amount}
+                                                           category={category}
+                                                           merchant={merchant}/>;
                                 })}
                             </TableBody>
                         </Table>

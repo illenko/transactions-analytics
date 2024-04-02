@@ -7,11 +7,11 @@ import Button from "@mui/material/Button";
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 
 const Layout = () => {
-    const pages = ['Transactions', 'Statistics', "Analytic-Groups", "Analytic-Dates"];
+    const pages = ['Transactions', "Analytic-Groups", "Analytic-Dates"];
 
     return (
         <Box>
-            <AppBar position="static" >
+            <AppBar position="static">
                 <Toolbar variant="dense">
                     <AccountBalanceIcon></AccountBalanceIcon>
                     <Typography
@@ -21,8 +21,8 @@ const Layout = () => {
                         sx={{
                             mr: 2,
                             fontWeight: 100,
-                            fontFamily:'roboto',
-                            color:'white',
+                            fontFamily: 'roboto',
+                            color: 'white',
                             letterSpacing: '.2rem',
                             textDecoration: 'none',
                         }}

@@ -2,11 +2,9 @@ import {BrowserRouter, Route, Routes} from "react-router-dom";
 import Layout from "./pages/Layout.tsx";
 import Transactions from "./pages/Transactions";
 import {FC} from "react";
-import {AppProps} from "./App.types";
-import Statistics from "./pages/Statistics";
 import {createTheme, ThemeProvider} from "@mui/material";
-import Transaction from "./pages/Transaction";
-import AnalyticDates from "./pages/AnalyticGroups.tsx";
+import AnalyticGroups from "./pages/AnalyticGroups.tsx";
+import AnalyticDates from "./pages/AnalyticDates.tsx";
 
 const theme = createTheme({
     components: {
@@ -21,17 +19,15 @@ const theme = createTheme({
     },
 })
 
-const App: FC<AppProps> = ({title}) => {
+const App: FC = () => {
     return (
         <ThemeProvider theme={theme}>
             <BrowserRouter>
                 <Routes>
                     <Route path="/" element={<Layout/>}>
-                        <Route path="/transactions" element={<Transactions title={title}/>}/>
-                        <Route path="/transactions/:id" element={<Transaction title={title}/>}/>
-                        <Route path="/statistics" element={<Statistics title={"Statistics"}/>}/>
-                        <Route path="/analytic-groups" element={<AnalyticDates title={"Statistics"}/>}/>
-                        <Route path="/analytic-dates" element={<Statistics title={"Statistics"}/>}/>
+                        <Route path="/transactions" element={<Transactions/>}/>
+                        <Route path="/analytic-groups" element={<AnalyticGroups/>}/>
+                        <Route path="/analytic-dates" element={<AnalyticDates/>}/>
                     </Route>
                 </Routes>
             </BrowserRouter>

@@ -1,5 +1,5 @@
 import {FC, useEffect, useState} from "react";
-import {Analytic, AppProps} from "../App.types.ts";
+import {Analytic} from "../App.types.ts";
 import Container from "@mui/material/Container";
 import Stack from "@mui/material/Stack";
 import {FormControl, InputLabel, MenuItem, Select, SelectChangeEvent} from "@mui/material";
@@ -14,7 +14,7 @@ import PaymentIcon from "@mui/icons-material/Payment";
 import ListItemText from "@mui/material/ListItemText";
 import {BarChart, PieChart} from "@mui/x-charts";
 
-const AnalyticDates: FC<AppProps> = () => {
+const AnalyticGroups: FC = () => {
     const [type, setType] = useState<string>('expenses');
     const [groupBy, setGroupBy] = useState<string>('category');
     const [chartType, setChartType] = useState<string>('pie');
@@ -46,7 +46,7 @@ const AnalyticDates: FC<AppProps> = () => {
 
     useEffect(() => {
         loadAnalytic();
-    }, [type, groupBy, loadAnalytic]);
+    }, [type, groupBy]);
 
 
     return (
@@ -107,45 +107,43 @@ const AnalyticDates: FC<AppProps> = () => {
                     <Card sx={{minWidth: 500, minHeight: 300}}>
                         <CardContent>
                             {(() => {
-                                if (analytic && chartType == 'pie') {
-                                    return <PieChart
-                                        series={[
-                                            {
-                                                data: analytic.groups.map((it, index) => {
-                                                    return {key: index, value: Math.abs(it.amount), label: it.name}
-                                                }),
-                                                innerRadius: 80,
-                                                outerRadius: 100,
-                                                paddingAngle: 1,
-                                                cornerRadius: 3,
-                                                cx: 150,
-                                                cy: 150,
-                                            },
-                                        ]}
-                                        width={500}
-                                        height={300}
-                                    />
+                                if (analytic) {
+                                    if (chartType == 'pie') {
+                                        return <PieChart
+                                            series={[
+                                                {
+                                                    data: analytic.groups.map((it, index) => {
+                                                        return {key: index, value: Math.abs(it.amount), label: it.name}
+                                                    }),
+                                                    innerRadius: 80,
+                                                    outerRadius: 100,
+                                                    paddingAngle: 1,
+                                                    cornerRadius: 3,
+                                                    cx: 150,
+                                                    cy: 150,
+                                                },
+                                            ]}
+                                            width={700}
+                                            height={300}
+                                        />
+                                    } else {
+                                        return <BarChart
+                                            xAxis={[{
+                                                scaleType: 'band', data: analytic.groups.map((it) => {
+                                                    return it.name
+                                                })
+                                            }]}
+                                            series={[{
+                                                data: analytic.groups.map((it) => {
+                                                    return Math.abs(it.amount)
+                                                })
+                                            }]}
+                                            width={700}
+                                            height={300}
+                                        />
+                                    }
                                 }
                             })()}
-                            {(() => {
-                                if (analytic && chartType == 'bar') {
-                                    return <BarChart
-                                        xAxis={[{
-                                            scaleType: 'band', data: analytic.groups.map((it) => {
-                                                return it.name
-                                            })
-                                        }]}
-                                        series={[{
-                                            data: analytic.groups.map((it) => {
-                                                return Math.abs(it.amount)
-                                            })
-                                        }]}
-                                        width={500}
-                                        height={300}
-                                    />
-                                }
-                            })()}
-
                         </CardContent>
                     </Card>
                 </Stack>
@@ -154,4 +152,4 @@ const AnalyticDates: FC<AppProps> = () => {
     );
 };
 
-export default AnalyticDates;
+export default AnalyticGroups;
