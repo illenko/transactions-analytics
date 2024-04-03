@@ -7,7 +7,7 @@ import (
 )
 
 func NewConnection(config config.AppConfig) *gorm.DB {
-	db, err := gorm.Open(postgres.Open(config.Database.Dsn), &gorm.Config{})
+	db, err := gorm.Open(postgres.Open(config.Database.Url), &gorm.Config{})
 
 	if err != nil {
 		panic(err)

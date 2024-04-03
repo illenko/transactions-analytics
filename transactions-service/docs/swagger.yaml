@@ -48,13 +48,13 @@ paths:
         in: query
         name: unit
         type: string
-      - description: Category for filtering
+      - default: absolute
+        description: Calculation type
+        enum:
+        - absolute
+        - cumulative
         in: query
-        name: category
-        type: string
-      - description: Merchant for filtering
-        in: query
-        name: merchant
+        name: calculation
         type: string
       produces:
       - application/json
@@ -77,7 +77,7 @@ paths:
         - category
         - merchant
         in: query
-        name: groupBy
+        name: group
         type: string
       produces:
       - application/json
@@ -102,14 +102,6 @@ paths:
         in: query
         name: unit
         type: string
-      - description: Category for filtering
-        in: query
-        name: category
-        type: string
-      - description: Merchant for filtering
-        in: query
-        name: merchant
-        type: string
       produces:
       - application/json
       responses:
@@ -131,7 +123,7 @@ paths:
         - category
         - merchant
         in: query
-        name: groupBy
+        name: group
         type: string
       produces:
       - application/json

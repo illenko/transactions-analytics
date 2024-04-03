@@ -28,15 +28,14 @@
                         "in": "query"
                     },
                     {
+                        "enum": [
+                            "absolute",
+                            "cumulative"
+                        ],
                         "type": "string",
-                        "description": "Category for filtering",
-                        "name": "category",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Merchant for filtering",
-                        "name": "merchant",
+                        "default": "absolute",
+                        "description": "Calculation type",
+                        "name": "calculation",
                         "in": "query"
                     }
                 ],
@@ -71,7 +70,7 @@
                         "type": "string",
                         "default": "category",
                         "description": "Grouping field",
-                        "name": "groupBy",
+                        "name": "group",
                         "in": "query"
                     }
                 ],
@@ -108,18 +107,6 @@
                         "description": "Date unit",
                         "name": "unit",
                         "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Category for filtering",
-                        "name": "category",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Merchant for filtering",
-                        "name": "merchant",
-                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -153,7 +140,7 @@
                         "type": "string",
                         "default": "category",
                         "description": "Grouping field",
-                        "name": "groupBy",
+                        "name": "group",
                         "in": "query"
                     }
                 ],

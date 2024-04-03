@@ -7,9 +7,9 @@ import (
 )
 
 type AnalyticRepository interface {
-	Find(groupBy string, positiveAmount bool) (analyticItems []model.AnalyticItem, err error)
-	FindByDates(positiveAmount bool, unit string, category string, merchant string) (expenses []model.DateAnalyticItem, err error)
-	FindByDatesCumulative(positiveAmount bool, unit string, category string, merchant string) (items []model.DateAnalyticItem, err error)
+	Find(group string, positiveAmount bool) (analyticItems []model.AnalyticItem, err error)
+	FindByDates(positiveAmount bool, unit string) (expenses []model.DateAnalyticItem, err error)
+	FindByDatesCumulative(positiveAmount bool, unit string) (items []model.DateAnalyticItem, err error)
 }
 
 type analyticRepository struct {
@@ -24,8 +24,8 @@ func NewAnalyticRepository(log *slog.Logger, db *gorm.DB) AnalyticRepository {
 	}
 }
 
-func (r *analyticRepository) Find(groupBy string, positiveAmount bool) (analyticItems []model.AnalyticItem, err error) {
-	result := r.db.Select(groupBy + " as name, count(id), SUM(amount) as amount").
+func (r *analyticRepository) Find(group string, positiveAmount bool) (analyticItems []model.AnalyticItem, err error) {
+	result := r.db.Select(group + " as name, count(id), SUM(amount) as amount").
 		Table("transactions").
 		Where(r.whereAmount(positiveAmount)).
 		Group("name").
@@ -34,24 +34,20 @@ func (r *analyticRepository) Find(groupBy string, positiveAmount bool) (analytic
 	return analyticItems, result.Error
 }
 
-func (r *analyticRepository) FindByDates(positiveAmount bool, unit string, category string, merchant string) (items []model.DateAnalyticItem, err error) {
+func (r *analyticRepository) FindByDates(positiveAmount bool, unit string) (items []model.DateAnalyticItem, err error) {
 	result := r.db.Select("DATE_TRUNC('" + unit + "', datetime) AS date, count(amount) as count, SUM(amount) AS amount").
 		Table("transactions").
 		Where(r.whereAmount(positiveAmount)).
-		Where(r.optionalWhere("category", category)).
-		Where(r.optionalWhere("merchant", merchant)).
 		Group("date").
 		Order("date").
 		Scan(&items)
 	return items, result.Error
 }
 
-func (r *analyticRepository) FindByDatesCumulative(positiveAmount bool, unit string, category string, merchant string) (items []model.DateAnalyticItem, err error) {
+func (r *analyticRepository) FindByDatesCumulative(positiveAmount bool, unit string) (items []model.DateAnalyticItem, err error) {
 	result := r.db.Select("DATE_TRUNC('" + unit + "', datetime) AS date, SUM(count(amount)) OVER (ORDER BY DATE_TRUNC('" + unit + "', datetime)) AS count, SUM(SUM(amount)) OVER (ORDER BY DATE_TRUNC('" + unit + "', datetime)) AS amount").
 		Table("transactions").
 		Where(r.whereAmount(positiveAmount)).
-		Where(r.optionalWhere("category", category)).
-		Where(r.optionalWhere("merchant", merchant)).
 		Group("date").
 		Order("date").
 		Scan(&items)
@@ -65,13 +61,6 @@ func (r *analyticRepository) whereAmount(positiveAmount bool) (where string) {
 	} else {
 		return "amount < 0"
 	}
-}
-
-func (r *analyticRepository) optionalWhere(column, val string) (where string, value string) {
-	if val != "" {
-		return column + " = ?", val
-	}
-	return "1 = ?", "1"
 }
 
 func (r *analyticRepository) orderDirection(positiveAmount bool) (order string) {

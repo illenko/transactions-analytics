@@ -2,4 +2,4 @@ server:
   port: 8080
 
 database:
-  dsn: host=localhost user=postgres password=postgres dbname=transaction-service port=5432
+  url: postgres://postgres:postgres@localhost:5432/transaction-service

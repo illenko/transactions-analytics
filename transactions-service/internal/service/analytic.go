@@ -10,8 +10,8 @@ import (
 )
 
 type AnalyticService interface {
-	Analytic(ctx context.Context, analyticType string, groupBy string) (model.AnalyticResponse, error)
-	AnalyticByDates(ctx context.Context, analyticType string, unit string, category string, merchant string, valueType string) (analytic model.AnalyticResponse, err error)
+	Analytic(ctx context.Context, direction string, group string) (model.AnalyticResponse, error)
+	AnalyticByDates(ctx context.Context, direction string, unit string, calculation string) (analytic model.AnalyticResponse, err error)
 }
 
 type analyticService struct {
@@ -28,8 +28,8 @@ func NewAnalyticService(log *slog.Logger, repo database.AnalyticRepository, mapp
 	}
 }
 
-func (s *analyticService) Analytic(ctx context.Context, analyticType string, groupBy string) (model.AnalyticResponse, error) {
-	analyticItems, err := s.repo.Find(groupBy, s.resolveAmount(analyticType))
+func (s *analyticService) Analytic(ctx context.Context, direction string, group string) (model.AnalyticResponse, error) {
+	analyticItems, err := s.repo.Find(group, s.resolveAmount(direction))
 	if err != nil {
 		s.log.ErrorContext(ctx, "When retrieving income transaction statistics")
 		return model.AnalyticResponse{}, err
@@ -37,8 +37,8 @@ func (s *analyticService) Analytic(ctx context.Context, analyticType string, gro
 	return s.mapper.ToResponse(analyticItems), nil
 }
 
-func (s *analyticService) AnalyticByDates(ctx context.Context, analyticType string, unit string, category string, merchant string, valueType string) (analytic model.AnalyticResponse, err error) {
-	analyticItems, err := s.getAnalyticByDates(valueType, analyticType, unit, category, merchant)
+func (s *analyticService) AnalyticByDates(ctx context.Context, direction string, unit string, calculation string) (analytic model.AnalyticResponse, err error) {
+	analyticItems, err := s.getAnalyticByDates(calculation, direction, unit)
 
 	if err != nil {
 		s.log.ErrorContext(ctx, "When retrieving income transaction statistics by dates")
@@ -48,11 +48,11 @@ func (s *analyticService) AnalyticByDates(ctx context.Context, analyticType stri
 	return s.resolveMappingByUnit(unit, analyticItems)
 }
 
-func (s *analyticService) getAnalyticByDates(valueType string, analyticType string, unit string, category string, merchant string) ([]dbmodel.DateAnalyticItem, error) {
-	if valueType == "absolute" {
-		return s.repo.FindByDates(s.resolveAmount(analyticType), unit, category, merchant)
+func (s *analyticService) getAnalyticByDates(calculation string, direction string, unit string) ([]dbmodel.DateAnalyticItem, error) {
+	if calculation == "absolute" {
+		return s.repo.FindByDates(s.resolveAmount(direction), unit)
 	} else {
-		return s.repo.FindByDatesCumulative(s.resolveAmount(analyticType), unit, category, merchant)
+		return s.repo.FindByDatesCumulative(s.resolveAmount(direction), unit)
 	}
 }
 
@@ -64,6 +64,6 @@ func (s *analyticService) resolveMappingByUnit(unit string, analyticItems []dbmo
 	}
 }
 
-func (s *analyticService) resolveAmount(analyticType string) bool {
-	return analyticType == "income"
+func (s *analyticService) resolveAmount(direction string) bool {
+	return direction == "income"
 }

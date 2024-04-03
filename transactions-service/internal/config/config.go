@@ -8,7 +8,7 @@ import (
 )
 
 type DatabaseConfig struct {
-	Dsn string `yaml:"dsn"`
+	Url string `yaml:"url"`
 }
 
 type ServerConfig struct {

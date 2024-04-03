@@ -10,3 +10,15 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=transaction-service
+
+  flyway:
+    image: flyway/flyway:9
+    environment:
+      - FLYWAY_URL=jdbc:postgresql://psql:5432/transaction-service
+      - FLYWAY_USER=postgres
+      - FLYWAY_PASSWORD=postgres
+    command: migrate
+    volumes:
+      - ./../migrations:/flyway/sql
+    depends_on:
+      - psql

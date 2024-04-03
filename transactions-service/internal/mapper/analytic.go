@@ -46,7 +46,7 @@ func (m *analyticMapper) toDatedResponse(items []dbmodel.DateAnalyticItem, forma
 
 type datedFormatter func(dbmodel.DateAnalyticItem) model.AnalyticGroup
 
-func (m *analyticMapper) toGroup(item dbmodel.AnalyticItem) model.AnalyticGroup {
+func (m *analyticMapper) toGroup(item dbmodel.AnalyticItem) (group model.AnalyticGroup) {
 	return model.AnalyticGroup{
 		Name:   item.Name,
 		Count:  item.Count,

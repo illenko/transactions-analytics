@@ -1,12 +1,3 @@
-CREATE TABLE IF NOT EXISTS transactions
-(
-    id       uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-    datetime timestamp      not null,
-    amount   decimal(20, 2) not null,
-    category varchar(256)   not null,
-    merchant varchar(256)   not null
-);
-
 INSERT INTO transactions (id, datetime, amount, category, merchant)
 VALUES ('44bdcdbc-4eae-443d-9bbd-4d1c1b7e628a', '2024-03-28 16:40:31.000000', -13.00, 'taxi', 'uklon'),
        ('64d3e47e-985b-46a0-8366-183693135ce2', '2024-03-27 12:51:29.846253', 20.00, 'p2p', 'stripe'),

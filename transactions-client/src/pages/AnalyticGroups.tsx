@@ -15,18 +15,18 @@ import ListItemText from "@mui/material/ListItemText";
 import {BarChart, PieChart} from "@mui/x-charts";
 
 const AnalyticGroups: FC = () => {
-    const [type, setType] = useState<string>('expenses');
-    const [groupBy, setGroupBy] = useState<string>('category');
+    const [direction, setDirection] = useState<string>('expenses');
+    const [group, setGroup] = useState<string>('category');
     const [chartType, setChartType] = useState<string>('pie');
     const [analytic, setAnalytic] = useState<Analytic>()
 
-    const handleTypeChange = (event: SelectChangeEvent) => {
-        setType(event.target.value);
+    const handleDirectionChange = (event: SelectChangeEvent) => {
+        setDirection(event.target.value);
         loadAnalytic()
     };
 
-    const handleGroupByChange = (event: SelectChangeEvent) => {
-        setGroupBy(event.target.value);
+    const handleGroupChange = (event: SelectChangeEvent) => {
+        setGroup(event.target.value);
         loadAnalytic()
     };
 
@@ -37,7 +37,7 @@ const AnalyticGroups: FC = () => {
 
     const loadAnalytic = async () => {
         try {
-            const {data} = await axios.get(`http://localhost:8080/analytic/${type}/groups?groupBy=${groupBy}`);
+            const {data} = await axios.get(`http://localhost:8080/analytic/${direction}/groups?group=${group}`);
             setAnalytic(data);
         } catch (error) {
             console.error(error);
@@ -46,7 +46,7 @@ const AnalyticGroups: FC = () => {
 
     useEffect(() => {
         loadAnalytic();
-    }, [type, groupBy]);
+    }, [direction, group]);
 
 
     return (
@@ -54,15 +54,15 @@ const AnalyticGroups: FC = () => {
             <Container maxWidth="lg">
                 <Stack alignItems="center" justifyContent="center" spacing={2} direction="row">
                     <FormControl variant="filled" sx={{m: 1, minWidth: 300}}>
-                        <InputLabel id="type-label">Type</InputLabel>
-                        <Select labelId="type-label" id="type" value={type} onChange={handleTypeChange}>
+                        <InputLabel id="direction-label">Direction</InputLabel>
+                        <Select labelId="direction-label" id="type" value={direction} onChange={handleDirectionChange}>
                             <MenuItem value="expenses">Expenses</MenuItem>
                             <MenuItem value="income">Income</MenuItem>
                         </Select>
                     </FormControl>
                     <FormControl variant="filled" sx={{m: 1, minWidth: 300}}>
-                        <InputLabel id="group-by-label">Group by</InputLabel>
-                        <Select labelId="group-by-label" id="group-by" value={groupBy} onChange={handleGroupByChange}>
+                        <InputLabel id="group-label">Group by</InputLabel>
+                        <Select labelId="group-label" id="group" value={group} onChange={handleGroupChange}>
                             <MenuItem value="category">Category</MenuItem>
                             <MenuItem value="merchant">Merchant</MenuItem>
                         </Select>
@@ -87,7 +87,7 @@ const AnalyticGroups: FC = () => {
                                 You have made <b>{analytic?.count}</b> transactions
                             </Typography>
                             <Typography component="div">
-                                in <b>{analytic?.groups?.length}</b> {groupBy}
+                                in <b>{analytic?.groups?.length}</b> {group}
                             </Typography>
                             <Typography sx={{fontSize: 14}} component="div">
                                 <List sx={{width: '100%', maxWidth: 360, bgcolor: 'background.paper'}}>

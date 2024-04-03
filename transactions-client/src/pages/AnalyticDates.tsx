@@ -9,14 +9,14 @@ import axios from "axios";
 import {BarChart, LineChart} from "@mui/x-charts";
 
 const AnalyticDates: FC = () => {
-    const [type, setType] = useState<string>('expenses');
+    const [direction, setDirection] = useState<string>('expenses');
     const [unit, setUnit] = useState<string>('month');
-    const [valueType, setValueType] = useState<string>('cumulative');
+    const [calculation, setCalculation] = useState<string>('cumulative');
     const [value, setValue] = useState<string>('amount');
     const [analytic, setAnalytic] = useState<Analytic>()
 
-    const handleTypeChange = (event: SelectChangeEvent) => {
-        setType(event.target.value);
+    const handleDirectionChange = (event: SelectChangeEvent) => {
+        setDirection(event.target.value);
         loadAnalytic()
     };
 
@@ -25,8 +25,8 @@ const AnalyticDates: FC = () => {
         loadAnalytic()
     };
 
-    const handleValueTypeChange = (event: SelectChangeEvent) => {
-        setValueType(event.target.value);
+    const handleCalculationChange = (event: SelectChangeEvent) => {
+        setCalculation(event.target.value);
         loadAnalytic()
     };
 
@@ -37,7 +37,7 @@ const AnalyticDates: FC = () => {
 
     const loadAnalytic = async () => {
         try {
-            const {data} = await axios.get(`http://localhost:8080/analytic/${type}/dates?unit=${unit}&valueType=${valueType}`);
+            const {data} = await axios.get(`http://localhost:8080/analytic/${direction}/dates?unit=${unit}&calculation=${calculation}`);
             setAnalytic(data);
         } catch (error) {
             console.error(error);
@@ -46,7 +46,7 @@ const AnalyticDates: FC = () => {
 
     useEffect(() => {
         loadAnalytic();
-    }, [type, unit, valueType, value]);
+    }, [direction, unit, calculation, value]);
 
 
     return (
@@ -54,8 +54,9 @@ const AnalyticDates: FC = () => {
             <Container maxWidth="lg">
                 <Stack alignItems="center" justifyContent="center" spacing={2} direction="row">
                     <FormControl variant="filled" sx={{m: 1, minWidth: 300}}>
-                        <InputLabel id="type-label">Type</InputLabel>
-                        <Select labelId="type-label" id="type" value={type} onChange={handleTypeChange}>
+                        <InputLabel id="direction-label">Type</InputLabel>
+                        <Select labelId="direction-label" id="direction" value={direction}
+                                onChange={handleDirectionChange}>
                             <MenuItem value="expenses">Expenses</MenuItem>
                             <MenuItem value="income">Income</MenuItem>
                         </Select>
@@ -68,9 +69,9 @@ const AnalyticDates: FC = () => {
                         </Select>
                     </FormControl>
                     <FormControl variant="filled" sx={{m: 1, minWidth: 300}}>
-                        <InputLabel id="value-type-label">Value type</InputLabel>
-                        <Select labelId="value-type-label" id="value-type" value={valueType}
-                                onChange={handleValueTypeChange}>
+                        <InputLabel id="calculation-label">Calculation type</InputLabel>
+                        <Select labelId="calculation-label" id="calculation" value={calculation}
+                                onChange={handleCalculationChange}>
                             <MenuItem value="cumulative">Cumulative</MenuItem>
                             <MenuItem value="absolute">Absolute</MenuItem>
                         </Select>
@@ -91,7 +92,7 @@ const AnalyticDates: FC = () => {
                         <CardContent>
                             {(() => {
                                 if (analytic) {
-                                    if (valueType == 'cumulative') {
+                                    if (calculation == 'cumulative') {
                                         return <LineChart
                                             width={1000}
                                             height={500}
@@ -99,7 +100,7 @@ const AnalyticDates: FC = () => {
                                                 {
                                                     data: analytic.groups.map(it => {
                                                         return value == 'amount' ? Math.abs(it.amount) : it.count
-                                                    })
+                                                    }),
                                                 }
                                             ]}
                                             xAxis={[{
@@ -107,11 +108,6 @@ const AnalyticDates: FC = () => {
                                                     return it.name
                                                 })
                                             }]}
-                                            sx={{
-                                                '.MuiLineElement-root, .MuiMarkElement-root': {
-                                                    strokeWidth: 1,
-                                                },
-                                            }}
                                         />
                                     } else {
                                         return <BarChart

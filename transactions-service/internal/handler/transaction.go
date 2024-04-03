@@ -2,8 +2,6 @@ package handler
 
 import (
 	"context"
-	"fmt"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/illenko/transactions-service/internal/logger"
@@ -45,11 +43,11 @@ func (t *transactionHandler) FindAll(c *gin.Context) {
 	transactions, err := t.service.FindAll(ctx)
 
 	if err != nil {
-		t.serverError(ctx, c, err)
+		t.error(c, err)
 		return
 	}
 
-	t.successResponse(ctx, c, transactions)
+	t.success(c, transactions)
 }
 
 // FindById
@@ -67,7 +65,7 @@ func (t *transactionHandler) FindById(c *gin.Context) {
 	id, err := uuid.Parse(c.Param("id"))
 
 	if err != nil {
-		t.badRequest(ctx, c, "Id is not valid uuid")
+		t.badRequest(c, "Id is not valid uuid")
 		return
 	}
 
@@ -77,27 +75,26 @@ func (t *transactionHandler) FindById(c *gin.Context) {
 	transaction, err := t.service.FindById(ctx, id)
 
 	if err != nil {
-		t.serverError(ctx, c, err)
+		t.error(c, err)
 		return
 	}
 
-	t.successResponse(ctx, c, transaction)
+	t.success(c, transaction)
 }
 
-func (t *transactionHandler) badRequest(ctx context.Context, c *gin.Context, message string) {
-	t.logAndReturn(ctx, c, http.StatusBadRequest, gin.H{"error": message})
+func (t *transactionHandler) badRequest(c *gin.Context, message string) {
+	t.response(c, http.StatusBadRequest, gin.H{"error": message})
 }
 
-func (t *transactionHandler) serverError(ctx context.Context, c *gin.Context, err error) {
-	t.logAndReturn(ctx, c, http.StatusInternalServerError, err)
+func (t *transactionHandler) error(c *gin.Context, err error) {
+	t.response(c, http.StatusInternalServerError, err)
 }
 
-func (t *transactionHandler) successResponse(ctx context.Context, c *gin.Context, res interface{}) {
-	t.logAndReturn(ctx, c, http.StatusOK, res)
+func (t *transactionHandler) success(c *gin.Context, res interface{}) {
+	t.response(c, http.StatusOK, res)
 }
 
-func (t *transactionHandler) logAndReturn(ctx context.Context, c *gin.Context, status int, res interface{}) {
-	t.log.InfoContext(ctx, fmt.Sprintf("Returned response: %v, %v", status, spew.Sdump(res)))
+func (t *transactionHandler) response(c *gin.Context, status int, res interface{}) {
 	c.Header("Access-Control-Allow-Origin", "*")
 	c.JSON(status, res)
 

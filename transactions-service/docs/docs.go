@@ -37,15 +37,14 @@ const docTemplate = `{
                         "in": "query"
                     },
                     {
+                        "enum": [
+                            "absolute",
+                            "cumulative"
+                        ],
                         "type": "string",
-                        "description": "Category for filtering",
-                        "name": "category",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Merchant for filtering",
-                        "name": "merchant",
+                        "default": "absolute",
+                        "description": "Calculation type",
+                        "name": "calculation",
                         "in": "query"
                     }
                 ],
@@ -80,7 +79,7 @@ const docTemplate = `{
                         "type": "string",
                         "default": "category",
                         "description": "Grouping field",
-                        "name": "groupBy",
+                        "name": "group",
                         "in": "query"
                     }
                 ],
@@ -117,18 +116,6 @@ const docTemplate = `{
                         "description": "Date unit",
                         "name": "unit",
                         "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Category for filtering",
-                        "name": "category",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Merchant for filtering",
-                        "name": "merchant",
-                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -162,7 +149,7 @@ const docTemplate = `{
                         "type": "string",
                         "default": "category",
                         "description": "Grouping field",
-                        "name": "groupBy",
+                        "name": "group",
                         "in": "query"
                     }
                 ],

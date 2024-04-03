@@ -36,18 +36,18 @@ type Groups string
 
 var groups = []string{"category", "merchant"}
 var units = []string{"day", "month"}
-var valueTypes = []string{"absolute", "cumulative"}
+var calculations = []string{"absolute", "cumulative"}
 
 const (
-	defaultGroupBy   = "category"
-	defaultUnit      = "month"
-	defaultValueType = "absolute"
+	defaultGroup       = "category"
+	defaultUnit        = "month"
+	defaultCalculation = "absolute"
 )
 
 // Income
 //
 //	@Summary	    Income analytic for groups
-//	@Param   		groupBy  query     string     false  "Grouping field"       default(category) Enums(category, merchant)
+//	@Param   		group  query     string     false  "Grouping field"       default(category) Enums(category, merchant)
 //	@Tags			income
 //	@Produce		json
 //	@Success		200	{array}	model.AnalyticResponse
@@ -59,7 +59,7 @@ func (h *analyticHandler) Income(c *gin.Context) {
 // Expenses
 //
 //	@Summary	    Expenses analytic for groups
-//	@Param   		groupBy  query     string     false  "Grouping field"       default(category) Enums(category, merchant)
+//	@Param   		group  query     string     false  "Grouping field"       default(category) Enums(category, merchant)
 //	@Tags			expenses
 //	@Produce		json
 //	@Success		200	{array}	model.AnalyticResponse
@@ -68,12 +68,27 @@ func (h *analyticHandler) Expenses(c *gin.Context) {
 	h.analytic(c, "expenses")
 }
 
+func (h *analyticHandler) analytic(c *gin.Context, direction string) {
+	ctx := h.buildContext()
+	group, ok := c.GetQuery("group")
+	if !ok || !lo.Contains(groups, group) {
+		group = defaultGroup
+	}
+
+	result, err := h.service.Analytic(ctx, direction, group)
+
+	if err != nil {
+		h.error(ctx, c, err)
+		return
+	}
+
+	h.success(ctx, c, result)
+}
+
 // IncomeDates
 //
 //	@Summary	    Income analytic for dates
 //	@Param   		unit  query     string     false  "Date unit"       default(month) Enums(month, day)
-//	@Param   		category  query     string     false  "Category for filtering"
-//	@Param   		merchant  query     string     false  "Merchant for filtering"
 //	@Tags			income
 //	@Produce		json
 //	@Success		200	{array}	model.AnalyticResponse
@@ -86,8 +101,7 @@ func (h *analyticHandler) IncomeDates(c *gin.Context) {
 //
 //	@Summary	    Expenses analytic for dates
 //	@Param   		unit  query     string     false  "Date unit"       default(month) Enums(month, day)
-//	@Param   		category  query     string     false  "Category for filtering"
-//	@Param   		merchant  query     string     false  "Merchant for filtering"
+//	@Param   		calculation  query     string     false  "Calculation type"       default(absolute) Enums(absolute, cumulative)
 //	@Tags			expenses
 //	@Produce		json
 //	@Success		200	{array}	model.AnalyticResponse
@@ -96,24 +110,7 @@ func (h *analyticHandler) ExpensesDates(c *gin.Context) {
 	h.analyticDates(c, "expenses")
 }
 
-func (h *analyticHandler) analytic(c *gin.Context, analyticType string) {
-	ctx := h.buildContext()
-	groupBy, ok := c.GetQuery("groupBy")
-	if !ok || !lo.Contains(groups, groupBy) {
-		groupBy = defaultGroupBy
-	}
-
-	result, err := h.service.Analytic(ctx, analyticType, groupBy)
-
-	if err != nil {
-		h.serverError(ctx, c, err)
-		return
-	}
-
-	h.successResponse(ctx, c, result)
-}
-
-func (h *analyticHandler) analyticDates(c *gin.Context, analyticType string) {
+func (h *analyticHandler) analyticDates(c *gin.Context, direction string) {
 	ctx := h.buildContext()
 
 	unit, ok := c.GetQuery("unit")
@@ -122,35 +119,35 @@ func (h *analyticHandler) analyticDates(c *gin.Context, analyticType string) {
 		unit = defaultUnit
 	}
 
-	valueType, ok := c.GetQuery("valueType")
+	calculation, ok := c.GetQuery("calculation")
 
-	if !ok || !lo.Contains(valueTypes, valueType) {
-		valueType = defaultValueType
+	if !ok || !lo.Contains(calculations, calculation) {
+		calculation = defaultCalculation
 	}
 
-	result, err := h.service.AnalyticByDates(ctx, analyticType, unit, c.Query("category"), c.Query("merchant"), valueType)
+	result, err := h.service.AnalyticByDates(ctx, direction, unit, calculation)
 
 	if err != nil {
-		h.serverError(ctx, c, err)
+		h.error(ctx, c, err)
 		return
 	}
 
-	h.successResponse(ctx, c, result)
+	h.success(ctx, c, result)
 }
 
 func (h *analyticHandler) buildContext() context.Context {
 	return logger.AppendCtx(context.Background(), slog.String("requestID", uuid.New().String()))
 }
 
-func (h *analyticHandler) serverError(ctx context.Context, c *gin.Context, err error) {
-	h.logAndReturn(ctx, c, http.StatusInternalServerError, err)
+func (h *analyticHandler) error(ctx context.Context, c *gin.Context, err error) {
+	h.response(ctx, c, http.StatusInternalServerError, err)
 }
 
-func (h *analyticHandler) successResponse(ctx context.Context, c *gin.Context, res interface{}) {
-	h.logAndReturn(ctx, c, http.StatusOK, res)
+func (h *analyticHandler) success(ctx context.Context, c *gin.Context, res interface{}) {
+	h.response(ctx, c, http.StatusOK, res)
 }
 
-func (h *analyticHandler) logAndReturn(ctx context.Context, c *gin.Context, status int, res interface{}) {
+func (h *analyticHandler) response(ctx context.Context, c *gin.Context, status int, res interface{}) {
 	h.log.InfoContext(ctx, fmt.Sprintf("Returned response: %v, %v", status, spew.Sdump(res)))
 	c.Header("Access-Control-Allow-Origin", "*")
 	c.JSON(status, res)
