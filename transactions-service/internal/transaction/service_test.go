@@ -1,10 +1,9 @@
-package service
+package transaction
 
 import (
 	"context"
 	"github.com/google/uuid"
-	"github.com/illenko/transactions-service/internal/mock"
-	dbmodel "github.com/illenko/transactions-service/internal/model"
+	"github.com/illenko/transactions-service/internal/transaction/mock"
 	"github.com/illenko/transactions-service/pkg/model"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -19,10 +18,10 @@ func TestFindAll(t *testing.T) {
 	ctrl := gomock.NewController(t)
 
 	logger := slog.Default()
-	repository := mock.NewMockTransactionRepository(ctrl)
-	mapper := mock.NewMockTransactionMapper(ctrl)
+	repository := mock.NewMockRepository(ctrl)
+	mapper := mock.NewMockMapper(ctrl)
 
-	var transactions []dbmodel.Transaction
+	var transactions []Entity
 	gofakeit.Slice(&transactions)
 
 	var expected []model.TransactionResponse
@@ -31,7 +30,7 @@ func TestFindAll(t *testing.T) {
 	repository.EXPECT().FindAll().Return(transactions, nil)
 	mapper.EXPECT().ToResponses(transactions).Return(expected)
 
-	sut := NewTransactionService(logger, repository, mapper)
+	sut := NewService(logger, repository, mapper)
 
 	actual, err := sut.FindAll(context.Background())
 
@@ -43,11 +42,11 @@ func TestFindById(t *testing.T) {
 	ctrl := gomock.NewController(t)
 
 	logger := slog.Default()
-	repository := mock.NewMockTransactionRepository(ctrl)
-	mapper := mock.NewMockTransactionMapper(ctrl)
+	repository := mock.NewMockRepository(ctrl)
+	mapper := mock.NewMockMapper(ctrl)
 	id := uuid.New()
 
-	var transaction dbmodel.Transaction
+	var transaction Entity
 	gofakeit.Struct(&transaction)
 
 	var expected model.TransactionResponse
@@ -56,7 +55,7 @@ func TestFindById(t *testing.T) {
 	repository.EXPECT().FindById(id).Return(transaction, nil)
 	mapper.EXPECT().ToResponse(transaction).Return(expected)
 
-	sut := NewTransactionService(logger, repository, mapper)
+	sut := NewService(logger, repository, mapper)
 
 	actual, err := sut.FindById(context.Background(), id)
 

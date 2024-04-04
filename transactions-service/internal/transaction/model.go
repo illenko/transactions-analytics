@@ -1,11 +1,11 @@
-package model
+package transaction
 
 import (
 	"github.com/google/uuid"
 	"time"
 )
 
-type Transaction struct {
+type Entity struct {
 	ID       uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4()"`
 	Datetime time.Time
 	Amount   float64

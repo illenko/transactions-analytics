@@ -1,36 +1,34 @@
-package service
+package transaction
 
 import (
 	"context"
 	"fmt"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/google/uuid"
-	"github.com/illenko/transactions-service/internal/database"
-	"github.com/illenko/transactions-service/internal/mapper"
 	"github.com/illenko/transactions-service/pkg/model"
 	"log/slog"
 )
 
-type TransactionService interface {
+type Service interface {
 	FindAll(ctx context.Context) ([]model.TransactionResponse, error)
 	FindById(ctx context.Context, id uuid.UUID) (model.TransactionResponse, error)
 }
 
-type transactionService struct {
+type service struct {
 	log    *slog.Logger
-	repo   database.TransactionRepository
-	mapper mapper.TransactionMapper
+	repo   Repository
+	mapper Mapper
 }
 
-func NewTransactionService(log *slog.Logger, repo database.TransactionRepository, mapper mapper.TransactionMapper) TransactionService {
-	return &transactionService{
+func NewService(log *slog.Logger, repo Repository, mapper Mapper) Service {
+	return &service{
 		log:    log,
 		repo:   repo,
 		mapper: mapper,
 	}
 }
 
-func (t *transactionService) FindAll(ctx context.Context) ([]model.TransactionResponse, error) {
+func (t *service) FindAll(ctx context.Context) ([]model.TransactionResponse, error) {
 	t.log.InfoContext(ctx, "Retrieving all transactions")
 	transactionEntities, err := t.repo.FindAll()
 	if err != nil {
@@ -42,7 +40,7 @@ func (t *transactionService) FindAll(ctx context.Context) ([]model.TransactionRe
 
 }
 
-func (t *transactionService) FindById(ctx context.Context, id uuid.UUID) (model.TransactionResponse, error) {
+func (t *service) FindById(ctx context.Context, id uuid.UUID) (model.TransactionResponse, error) {
 	t.log.InfoContext(ctx, "Retrieving transaction by id")
 	transaction, err := t.repo.FindById(id)
 	if err != nil {

@@ -3,12 +3,13 @@ package server
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/illenko/transactions-service/docs"
-	"github.com/illenko/transactions-service/internal/handler"
+	"github.com/illenko/transactions-service/internal/analytic"
+	"github.com/illenko/transactions-service/internal/transaction"
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
-func New(transactionHandler handler.TransactionHandler, analyticHandler handler.AnalyticHandler) *gin.Engine {
+func New(transactionHandler transaction.Handler, analyticHandler analytic.Handler) *gin.Engine {
 	e := gin.Default()
 	e.GET("/transactions", transactionHandler.FindAll)
 	e.GET("/transactions/:id", transactionHandler.FindById)

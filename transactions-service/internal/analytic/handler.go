@@ -1,4 +1,4 @@
-package handler
+package analytic
 
 import (
 	"context"
@@ -7,26 +7,25 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/illenko/transactions-service/internal/logger"
-	"github.com/illenko/transactions-service/internal/service"
 	"github.com/samber/lo"
 	"log/slog"
 	"net/http"
 )
 
-type AnalyticHandler interface {
+type Handler interface {
 	Income(c *gin.Context)
 	Expenses(c *gin.Context)
 	IncomeDates(c *gin.Context)
 	ExpensesDates(c *gin.Context)
 }
 
-type analyticHandler struct {
+type handler struct {
 	log     *slog.Logger
-	service service.AnalyticService
+	service Service
 }
 
-func NewAnalyticHandler(log *slog.Logger, service service.AnalyticService) AnalyticHandler {
-	return &analyticHandler{
+func NewHandler(log *slog.Logger, service Service) Handler {
+	return &handler{
 		log:     log,
 		service: service,
 	}
@@ -52,7 +51,7 @@ const (
 //	@Produce		json
 //	@Success		200	{array}	model.AnalyticResponse
 //	@Router			/analytic/income/groups [get]
-func (h *analyticHandler) Income(c *gin.Context) {
+func (h *handler) Income(c *gin.Context) {
 	h.analytic(c, "income")
 }
 
@@ -64,11 +63,11 @@ func (h *analyticHandler) Income(c *gin.Context) {
 //	@Produce		json
 //	@Success		200	{array}	model.AnalyticResponse
 //	@Router			/analytic/expenses/groups [get]
-func (h *analyticHandler) Expenses(c *gin.Context) {
+func (h *handler) Expenses(c *gin.Context) {
 	h.analytic(c, "expenses")
 }
 
-func (h *analyticHandler) analytic(c *gin.Context, direction string) {
+func (h *handler) analytic(c *gin.Context, direction string) {
 	ctx := h.buildContext()
 	group, ok := c.GetQuery("group")
 	if !ok || !lo.Contains(groups, group) {
@@ -93,7 +92,7 @@ func (h *analyticHandler) analytic(c *gin.Context, direction string) {
 //	@Produce		json
 //	@Success		200	{array}	model.AnalyticResponse
 //	@Router			/analytic/income/dates [get]
-func (h *analyticHandler) IncomeDates(c *gin.Context) {
+func (h *handler) IncomeDates(c *gin.Context) {
 	h.analyticDates(c, "income")
 }
 
@@ -106,11 +105,11 @@ func (h *analyticHandler) IncomeDates(c *gin.Context) {
 //	@Produce		json
 //	@Success		200	{array}	model.AnalyticResponse
 //	@Router			/analytic/expenses/dates [get]
-func (h *analyticHandler) ExpensesDates(c *gin.Context) {
+func (h *handler) ExpensesDates(c *gin.Context) {
 	h.analyticDates(c, "expenses")
 }
 
-func (h *analyticHandler) analyticDates(c *gin.Context, direction string) {
+func (h *handler) analyticDates(c *gin.Context, direction string) {
 	ctx := h.buildContext()
 
 	unit, ok := c.GetQuery("unit")
@@ -135,19 +134,19 @@ func (h *analyticHandler) analyticDates(c *gin.Context, direction string) {
 	h.success(ctx, c, result)
 }
 
-func (h *analyticHandler) buildContext() context.Context {
+func (h *handler) buildContext() context.Context {
 	return logger.AppendCtx(context.Background(), slog.String("requestID", uuid.New().String()))
 }
 
-func (h *analyticHandler) error(ctx context.Context, c *gin.Context, err error) {
+func (h *handler) error(ctx context.Context, c *gin.Context, err error) {
 	h.response(ctx, c, http.StatusInternalServerError, err)
 }
 
-func (h *analyticHandler) success(ctx context.Context, c *gin.Context, res interface{}) {
+func (h *handler) success(ctx context.Context, c *gin.Context, res interface{}) {
 	h.response(ctx, c, http.StatusOK, res)
 }
 
-func (h *analyticHandler) response(ctx context.Context, c *gin.Context, status int, res interface{}) {
+func (h *handler) response(ctx context.Context, c *gin.Context, status int, res interface{}) {
 	h.log.InfoContext(ctx, fmt.Sprintf("Returned response: %v, %v", status, spew.Sdump(res)))
 	c.Header("Access-Control-Allow-Origin", "*")
 	c.JSON(status, res)

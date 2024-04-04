@@ -1,14 +1,14 @@
-package model
+package analytic
 
 import "time"
 
-type AnalyticItem struct {
+type Item struct {
 	Name   string
 	Count  int
 	Amount float64
 }
 
-type DateAnalyticItem struct {
+type DateItem struct {
 	Date   time.Time
 	Count  int
 	Amount float64
