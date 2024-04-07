@@ -1,3 +1,4 @@
+-- +goose Up
 CREATE TABLE IF NOT EXISTS transactions
 (
     id       uuid DEFAULT gen_random_uuid() PRIMARY KEY,

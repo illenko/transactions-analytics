@@ -1,6 +1,7 @@
 package main
 
 import (
+	"embed"
 	"github.com/gin-gonic/gin"
 	"github.com/illenko/transactions-service/internal/config"
 	"github.com/illenko/transactions-service/internal/database"
@@ -14,6 +15,9 @@ import (
 	"log/slog"
 )
 
+//go:embed migrations/*.sql
+var migrations embed.FS
+
 // @title           Transactions Service API
 // @version         1.0
 func main() {
@@ -22,6 +26,7 @@ func main() {
 			logger.New,
 			config.Get,
 			database.NewConnection,
+			database.NewMigration,
 			database.NewTransactionRepository,
 			database.NewAnalyticRepository,
 			mapper.NewTransactionMapper,
@@ -32,8 +37,12 @@ func main() {
 			handler.NewAnalyticHandler,
 			server.New,
 		),
-		fx.Invoke(func(e *gin.Engine, config config.AppConfig) {
-			err := e.Run(":" + config.Server.Port)
+		fx.Invoke(func(e *gin.Engine, migration database.Migration, config config.AppConfig) {
+			err := migration.Execute(migrations)
+			if err != nil {
+				return
+			}
+			err = e.Run(":" + config.Server.Port)
 			if err != nil {
 				return
 			}
