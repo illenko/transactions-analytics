@@ -1,0 +1,172 @@
+definitions:
+  model.AnalyticsGroup:
+    properties:
+      amount:
+        type: number
+      count:
+        type: integer
+      name:
+        type: string
+    type: object
+  model.AnalyticsResponse:
+    properties:
+      amount:
+        type: number
+      count:
+        type: integer
+      groups:
+        items:
+          $ref: '#/definitions/model.AnalyticsGroup'
+        type: array
+    type: object
+  model.TransactionResponse:
+    properties:
+      amount:
+        type: number
+      category:
+        type: string
+      datetime:
+        type: string
+      id:
+        type: string
+      merchant:
+        type: string
+    type: object
+info:
+  contact: {}
+  title: Analytics Service API
+  version: "1.0"
+paths:
+  /analytics/expenses/dates:
+    get:
+      parameters:
+      - default: month
+        description: Date unit
+        enum:
+        - month
+        - day
+        in: query
+        name: unit
+        type: string
+      - default: absolute
+        description: Calculation type
+        enum:
+        - absolute
+        - cumulative
+        in: query
+        name: calculation
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.AnalyticsResponse'
+            type: array
+      summary: Expenses analytics for dates
+      tags:
+      - expenses
+  /analytics/expenses/groups:
+    get:
+      parameters:
+      - default: category
+        description: Grouping field
+        enum:
+        - category
+        - merchant
+        in: query
+        name: group
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.AnalyticsResponse'
+            type: array
+      summary: Expenses analytics for groups
+      tags:
+      - expenses
+  /analytics/income/dates:
+    get:
+      parameters:
+      - default: month
+        description: Date unit
+        enum:
+        - month
+        - day
+        in: query
+        name: unit
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.AnalyticsResponse'
+            type: array
+      summary: Income analytics for dates
+      tags:
+      - income
+  /analytics/income/groups:
+    get:
+      parameters:
+      - default: category
+        description: Grouping field
+        enum:
+        - category
+        - merchant
+        in: query
+        name: group
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.AnalyticsResponse'
+            type: array
+      summary: Income analytics for groups
+      tags:
+      - income
+  /transactions:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.TransactionResponse'
+            type: array
+      summary: Retrieve transactions
+      tags:
+      - transaction
+  /transactions/{id}:
+    get:
+      parameters:
+      - description: Transaction ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.TransactionResponse'
+      summary: Retrieve transaction details
+      tags:
+      - transaction
+swagger: "2.0"
