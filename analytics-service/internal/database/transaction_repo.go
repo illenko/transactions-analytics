@@ -30,6 +30,6 @@ func (t *transactionRepository) FindAll() (transactions []model.Transaction, err
 }
 
 func (t *transactionRepository) FindById(id uuid.UUID) (transaction model.Transaction, err error) {
-	result := t.db.Find(&transaction, id)
+	result := t.db.First(&transaction, id)
 	return transaction, result.Error
 }

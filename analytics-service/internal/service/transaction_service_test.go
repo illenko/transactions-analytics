@@ -48,10 +48,16 @@ func TestFindById(t *testing.T) {
 	id := uuid.New()
 
 	var transaction dbmodel.Transaction
-	gofakeit.Struct(&transaction)
+	err := gofakeit.Struct(&transaction)
+	if err != nil {
+		assert.Fail(t, "unable to fake transaction")
+	}
 
 	var expected model.TransactionResponse
-	gofakeit.Struct(&expected)
+	err = gofakeit.Struct(&expected)
+	if err != nil {
+		assert.Fail(t, "unable to fake transaction response")
+	}
 
 	repository.EXPECT().FindById(id).Return(transaction, nil)
 	mapper.EXPECT().ToResponse(transaction).Return(expected)

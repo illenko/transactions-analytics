@@ -1,14 +1,13 @@
 package database
 
 import (
-	"embed"
 	"github.com/pressly/goose/v3"
 	"gorm.io/gorm"
 	"log/slog"
 )
 
 type Migration interface {
-	Execute(embedMigrations embed.FS) error
+	Execute(dir string) error
 }
 
 type migration struct {
@@ -23,8 +22,7 @@ func NewMigration(log *slog.Logger, db *gorm.DB) Migration {
 	}
 }
 
-func (m migration) Execute(migrations embed.FS) (err error) {
-	goose.SetBaseFS(migrations)
+func (m migration) Execute(dir string) (err error) {
 
 	err = goose.SetDialect("postgres")
 	if err != nil {
@@ -39,7 +37,7 @@ func (m migration) Execute(migrations embed.FS) (err error) {
 		return
 	}
 
-	err = goose.Up(dbConnection, "migrations")
+	err = goose.Up(dbConnection, dir)
 
 	if err != nil {
 		m.log.Error("When executing migration")

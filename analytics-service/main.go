@@ -1,7 +1,6 @@
 package main
 
 import (
-	"embed"
 	"github.com/gin-gonic/gin"
 	"github.com/illenko/analytics-service/internal/config"
 	"github.com/illenko/analytics-service/internal/database"
@@ -14,9 +13,6 @@ import (
 	"go.uber.org/fx/fxevent"
 	"log/slog"
 )
-
-//go:embed migrations/*.sql
-var migrations embed.FS
 
 // @title           Analytics Service API
 // @version         1.0
@@ -38,7 +34,7 @@ func main() {
 			server.New,
 		),
 		fx.Invoke(func(e *gin.Engine, migration database.Migration, config config.AppConfig) {
-			err := migration.Execute(migrations)
+			err := migration.Execute("migrations")
 			if err != nil {
 				return
 			}
