@@ -14,7 +14,18 @@ type TransactionRepositoryTestSuite struct {
 	integration.BaseIntegrationTestSuite
 }
 
-func (suite *TransactionRepositoryTestSuite) TestGetTransaction() {
+func (suite *TransactionRepositoryTestSuite) TestFindAll() {
+	suite.Run("Find transaction by id", func() {
+		repo := database.NewTransactionRepository(suite.Log, suite.DB)
+		transactions, err := repo.FindAll()
+		suite.NoError(err)
+		suite.NotNil(transactions)
+		suite.Equal(len(transactions), 16)
+	})
+
+}
+
+func (suite *TransactionRepositoryTestSuite) TestFindById() {
 	suite.Run("Find transaction by id", func() {
 		repo := database.NewTransactionRepository(suite.Log, suite.DB)
 		transaction, err := repo.FindById(uuid.MustParse("44bdcdbc-4eae-443d-9bbd-4d1c1b7e628a"))
@@ -35,6 +46,6 @@ func (suite *TransactionRepositoryTestSuite) TestGetTransaction() {
 	})
 }
 
-func TestNoteRepository(t *testing.T) {
+func TestTransactionRepository(t *testing.T) {
 	suite.Run(t, new(TransactionRepositoryTestSuite))
 }

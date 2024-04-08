@@ -23,7 +23,6 @@ func NewMigration(log *slog.Logger, db *gorm.DB) Migration {
 }
 
 func (m migration) Execute(dir string) (err error) {
-
 	err = goose.SetDialect("postgres")
 	if err != nil {
 		m.log.Error("When setting database dialect")

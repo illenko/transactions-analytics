@@ -28,7 +28,7 @@ func (suite *BaseIntegrationTestSuite) SetupSuite() {
 	pgContainer, err := postgres.RunContainer(
 		suite.Ctx,
 		testcontainers.WithImage("postgres:16-alpine"),
-		postgres.WithDatabase("notesdb"),
+		postgres.WithDatabase("analytics-service"),
 		postgres.WithUsername("postgres"),
 		postgres.WithPassword("postgres"),
 		testcontainers.WithWaitStrategy(
