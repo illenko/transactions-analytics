@@ -1,6 +1,6 @@
 ## Transactions Analytics Backend Service and Client
 
-### Source code for [Medium article]().
+### Source code for [Medium article](https://medium.com/@kostiantynillienko/rest-api-for-transaction-analytics-in-banking-applications-using-go-14bcaa2680c8).
 
 ### Backend Stack:
 * [fx](https://github.com/uber-go/fx)
