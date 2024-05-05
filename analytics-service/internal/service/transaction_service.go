@@ -50,5 +50,5 @@ func (t *transactionService) FindById(ctx context.Context, id uuid.UUID) (model.
 		return model.TransactionResponse{}, err
 	}
 	t.log.InfoContext(ctx, fmt.Sprintf("Found by id: %v", spew.Sdump(transaction)))
-	return t.mapper.ToResponse(transaction), nil
+	return t.mapper.ToResponse(*transaction), nil
 }

@@ -47,10 +47,10 @@ func (mr *MockTransactionRepositoryMockRecorder) FindAll() *gomock.Call {
 }
 
 // FindById mocks base method.
-func (m *MockTransactionRepository) FindById(id uuid.UUID) (model.Transaction, error) {
+func (m *MockTransactionRepository) FindById(id uuid.UUID) (*model.Transaction, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "FindById", id)
-	ret0, _ := ret[0].(model.Transaction)
+	ret0, _ := ret[0].(*model.Transaction)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

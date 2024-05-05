@@ -59,7 +59,7 @@ func TestFindById(t *testing.T) {
 		assert.Fail(t, "unable to fake transaction response")
 	}
 
-	repository.EXPECT().FindById(id).Return(transaction, nil)
+	repository.EXPECT().FindById(id).Return(&transaction, nil)
 	mapper.EXPECT().ToResponse(transaction).Return(expected)
 
 	sut := NewTransactionService(logger, repository, mapper)

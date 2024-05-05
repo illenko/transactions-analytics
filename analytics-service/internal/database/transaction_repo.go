@@ -9,7 +9,7 @@ import (
 
 type TransactionRepository interface {
 	FindAll() (transactions []model.Transaction, err error)
-	FindById(id uuid.UUID) (transaction model.Transaction, err error)
+	FindById(id uuid.UUID) (transaction *model.Transaction, err error)
 }
 
 type transactionRepository struct {
@@ -29,7 +29,11 @@ func (t *transactionRepository) FindAll() (transactions []model.Transaction, err
 	return transactions, result.Error
 }
 
-func (t *transactionRepository) FindById(id uuid.UUID) (transaction model.Transaction, err error) {
+func (t *transactionRepository) FindById(id uuid.UUID) (*model.Transaction, error) {
+	var transaction model.Transaction
 	result := t.db.First(&transaction, id)
-	return transaction, result.Error
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return &transaction, nil
 }

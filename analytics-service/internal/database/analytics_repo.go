@@ -25,6 +25,8 @@ func NewAnalyticsRepository(log *slog.Logger, db *gorm.DB) AnalyticsRepository {
 }
 
 func (r *analyticsRepository) Find(group string, positiveAmount bool) (analyticsItems []model.AnalyticsItem, err error) {
+	analyticsItems = []model.AnalyticsItem{}
+
 	result := r.db.Select(group + " as name, count(id), SUM(amount) as amount").
 		Table("transactions").
 		Where(r.whereAmount(positiveAmount)).
@@ -35,6 +37,8 @@ func (r *analyticsRepository) Find(group string, positiveAmount bool) (analytics
 }
 
 func (r *analyticsRepository) FindByDates(positiveAmount bool, unit string) (items []model.DateAnalyticsItem, err error) {
+	items = []model.DateAnalyticsItem{}
+
 	result := r.db.Select("DATE_TRUNC('" + unit + "', datetime) AS date, count(amount) as count, SUM(amount) AS amount").
 		Table("transactions").
 		Where(r.whereAmount(positiveAmount)).
@@ -45,6 +49,8 @@ func (r *analyticsRepository) FindByDates(positiveAmount bool, unit string) (ite
 }
 
 func (r *analyticsRepository) FindByDatesCumulative(positiveAmount bool, unit string) (items []model.DateAnalyticsItem, err error) {
+	items = []model.DateAnalyticsItem{}
+
 	result := r.db.Select("DATE_TRUNC('" + unit + "', datetime) AS date, SUM(count(amount)) OVER (ORDER BY DATE_TRUNC('" + unit + "', datetime)) AS count, SUM(SUM(amount)) OVER (ORDER BY DATE_TRUNC('" + unit + "', datetime)) AS amount").
 		Table("transactions").
 		Where(r.whereAmount(positiveAmount)).
