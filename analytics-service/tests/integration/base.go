@@ -13,7 +13,6 @@ import (
 	"time"
 )
 
-// BaseIntegrationTestSuite represents the note repository test suite.
 type BaseIntegrationTestSuite struct {
 	suite.Suite
 	Log                *slog.Logger
@@ -57,7 +56,7 @@ func (suite *BaseIntegrationTestSuite) SetupSuite() {
 
 	migration := database.NewMigration(suite.Log, db)
 
-	err = migration.Execute("../../../migrations")
+	err = migration.Execute("../../migrations")
 	suite.NoError(err)
 }
 
